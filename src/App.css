@@ -1,0 +1,307 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg-1: #0b1020;          /* Fondo base oscuro */
+  --bg-2: #111827;          /* Fondo intermedio */
+  --card: rgba(17, 24, 39, 0.85);
+  --muted: #9aa4b2;
+  --accent: #6366f1;        /* Indigo */
+  --accent-700: #4f46e5;
+  --accent-pink: #f472b6;
+  --superciclo-red: #ef4444;
+  --highlight-now: rgba(244, 114, 182, 0.95);
+  --text-primary: #f3f4f6;   /* Texto principal claro */
+  --text-secondary: #d1d5db; /* Texto suave */
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-1: #f1f5f9;        /* Fondo claro */
+    --bg-2: #e2e8f0;
+    --card: #ffffff;
+    --muted: #475569;
+    --accent: #4338ca;
+    --accent-700: #3730a3;
+    --accent-pink: #db2777;
+    --superciclo-red: #dc2626;
+    --highlight-now: rgba(244, 114, 182, 0.7);
+    --text-primary: #0f172a; /* Texto oscuro fuerte */
+    --text-secondary: #1e293b;
+  }
+}
+
+/* font */
+.font-inter { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+
+/* Global text clarity: strong contrast for primary text */
+body, .app-root {
+  background: var(--bg-1);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.container {
+  background: var(--card);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 40px rgba(0,0,0,0.3);
+}
+@media (prefers-color-scheme: light) {
+  body, .font-inter, .app-root {
+    color: var(--text-dark-strong);
+  }
+}
+
+/* Ensure all text elements inherit the strong color */
+input, button, th, td, label, p, h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+}
+
+input {
+  background-color: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+@media (prefers-color-scheme: light) {
+  input {
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+  }
+}
+
+
+@media (prefers-color-scheme: light) {
+  input[type="number"],
+  input[type="datetime-local"],
+  input[type="text"] {
+    background-color: rgba(0,0,0,0.03);
+    color: var(--text-dark-strong);
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+}
+
+input::placeholder { color: rgba(255,255,255,0.5); }
+@media (prefers-color-scheme: light) { input::placeholder { color: rgba(0,0,0,0.45); } }
+
+input:focus {
+  outline: none;
+  box-shadow: 0 8px 30px rgba(79,70,229,0.12);
+  border-color: var(--accent);
+}
+
+/* datetime text visibility on webkit */
+input[type="datetime-local"]::-webkit-datetime-edit-text { color: inherit; }
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
+  color: inherit;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+/* Calendar cell text clarity + subtle glow */
+.calendar-cell-text {
+  text-shadow: 0 0 6px rgba(0,0,0,0.18);
+  -webkit-text-stroke: 0.01px rgba(0,0,0,0.05);
+}
+
+/* Now cell highlight */
+.now-cell {
+  box-shadow: 0 8px 32px rgba(244,114,182,0.14);
+  transform: scale(1.03);
+  border: 2px solid var(--highlight-now);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+/* small responsive tweaks */
+@media (max-width: 640px) {
+  .hide-sm { display: none; }
+  .small-text { font-size: 0.82rem; }
+}
+
+/* === MOBILE OPTIMIZATIONS === */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .header-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .download-buttons {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config, .status {
+    padding: 1rem;
+  }
+
+  .config input {
+    font-size: 1rem;
+    padding: 0.6rem;
+  }
+
+  .calendar {
+    overflow-x: auto;
+    border-radius: 0.75rem;
+  }
+
+  .calendar table {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    font-size: 0.85rem;
+    width: auto;
+    padding: 0.4rem 0.7rem;
+  }
+
+  .superciclo-value {
+    font-size: 2rem;
+  }
+
+  .estado {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.9rem;
+  }
+}
+
+html {
+  color-scheme: dark !important;
+}
+/* === CALENDARIO FIJO Y RESPONSIVO === */
+.calendar-wrapper {
+  overflow: auto;
+  max-width: 100%;
+  max-height: 80vh;
+  position: relative;
+  border-radius: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99,102,241,0.4) transparent;
+}
+
+/* Mejor visibilidad en scroll horizontal */
+.calendar-wrapper::after {
+  content: "";
+  position: sticky;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1rem;
+  background: linear-gradient(to left, var(--bg-1), transparent);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Tabla del calendario */
+.calendar table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+/* === Cabecera fija (fila de horas) === */
+.calendar thead th {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+/* === Columnas fijas === */
+
+/* Columna 1: Día */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 35;
+  background: rgba(17, 24, 39, 0.92);
+  backdrop-filter: blur(4px);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.3);
+}
+
+/* Columna 2: Fecha */
+.sticky-col-2 {
+  position: sticky;
+  left: 3.2rem; /* ajusta si cambia el ancho de la columna “Día” */
+  z-index: 30;
+  background: rgba(17, 24, 39, 0.92);
+  backdrop-filter: blur(4px);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.25);
+}
+
+/* === Mobile tweaks === */
+@media (max-width: 768px) {
+  .calendar td div {
+    height: 1.6rem;
+    font-size: 0.7rem;
+  }
+
+  .calendar-wrapper {
+    max-height: 70vh;
+    border-radius: 0.5rem;
+  }
+
+  .calendar thead th {
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+
+  .sticky-col,
+  .sticky-col-2 {
+    font-size: 0.7rem;
+    min-width: 3rem;
+  }
+}
+
+input {
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+input:focus {
+  transform: scale(1.01);
+}
+
+.btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 500px) {
+  .status, .config {
+    font-size: 0.85rem;
+  }
+  .calendar table {
+    font-size: 0.8rem;
+  }
+}

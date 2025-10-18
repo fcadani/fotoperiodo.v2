@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fotoperiodo - SuperCiclo</title>
+
+    <!-- Tipografía -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- === Favicon y colores === -->
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <!-- === Descripción general === -->
+    <meta name="description" content="Configura y visualiza tu fotoperiodo personalizado con SuperCiclo." />
+
+    <!-- === Open Graph (redes sociales) === -->
+    <meta property="og:title" content="Fotoperiodo - SuperCiclo" />
+    <meta property="og:description" content="Visualiza y descarga tu calendario de luz y oscuridad de forma intuitiva." />
+    <meta property="og:image" content="/preview.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://fotoperiodo.vercel.app" />
+
+    <!-- === App-like behavior para móviles === -->
+    <!-- Usa solo una de las dos meta modernas -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- === Seguridad y SEO === -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="robots" content="index, follow" />
+
+  </head>
+
+  <body class="font-inter bg-gradient-to-b from-slate-50 to-slate-200 min-h-screen flex items-center justify-center">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
