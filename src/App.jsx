@@ -52,16 +52,7 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState("");
 
   // ref for calendar export
-  const calendarRef = useRef(null);
-  // Centrar automáticamente la celda actual en el calendario
-useEffect(() => {
-  if (!calendarRef.current) return;
-  const el = calendarRef.current.querySelector(".now-cell");
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-  }
-}, [currentDayIndex24h, currentHourIndex]);
-
+  const calendarRef = useRef(null)
 
   // ---- Load saved settings on mount ----
   useEffect(() => {
@@ -167,8 +158,17 @@ useEffect(() => {
         inline: "center",
       });
     }
+
+    // 🔆 Agrega un parpadeo visual temporal
+    el.classList.add("glow");
+    const timeout = setTimeout(() => {
+      el.classList.remove("glow");
+    }, 1600); // dura 1.6s
+
+    return () => clearTimeout(timeout);
   }
 }, []); // ← Solo se ejecuta una vez al montar
+
 
 
 
