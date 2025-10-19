@@ -889,10 +889,6 @@ button:hover, label:hover {
 }
 
 
-.calendar-title {
-  animation: glowPulse 4s ease-in-out infinite;
-}
-
 /* === Forzar estilo escritorio en exportaciones (evita media queries móviles) === */
 .export-desktop .calendar-wrapper {
   overflow-x: visible !important;
@@ -932,63 +928,6 @@ button:hover, label:hover {
   padding: 0 !important;
 }
 
-/* Título igual en todos los dispositivos */
-.export-desktop .calendar-title {
-  font-size: 1.9rem !important;
-  letter-spacing: 0.08em !important;
-  text-shadow:
-    0 0 8px rgba(139, 92, 246, 0.8),
-    0 0 15px rgba(236, 72, 153, 0.6);
-}
-/* === TÍTULO PRINCIPAL DEL CALENDARIO === */
-.calendar-title,
-th[colspan="26"] {
-  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
-  font-size: 2.2rem !important;
-  font-weight: 900 !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  color: #ffffff !important;
-  background: linear-gradient(90deg, #3b82f6, #ec4899, #22d3ee);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 
-    0 0 15px rgba(99, 102, 241, 0.6),
-    0 0 30px rgba(236, 72, 153, 0.5),
-    0 0 45px rgba(34, 211, 238, 0.4);
-  padding: 1rem 0 !important;
-  background-color: transparent !important;
-}
-
-/* === IGUAL ESTILO EN EXPORT === */
-.export-desktop .calendar-title,
-.export-desktop th[colspan="26"] {
-  font-size: 2.2rem !important;
-  text-shadow: 
-    0 0 18px rgba(139, 92, 246, 0.8),
-    0 0 32px rgba(236, 72, 153, 0.6);
-}
-/* === Estilo mejorado para el título del calendario === */
-.calendar-title {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: linear-gradient(90deg, #8b5cf6, #ec4899, #06b6d4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 10px rgba(139, 92, 246, 0.6),
-               0 0 20px rgba(236, 72, 153, 0.4),
-               0 0 30px rgba(6, 182, 212, 0.2);
-  padding: 14px 0;
-  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
-  background-color: rgba(15, 15, 35, 0.85);
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  backdrop-filter: blur(6px);
-}
-
 /* ✨ Animación leve de brillo (opcional) */
 @keyframes glowPulse {
   0% {
@@ -1008,7 +947,100 @@ th[colspan="26"] {
   }
 }
 
-/* Para activar el efecto animado: */
-.calendar-title {
-  animation: glowPulse 4s ease-in-out infinite;
+/* Ajuste responsivo para MOBILE */
+@media (max-width: 768px) {
+  .calendar-title {
+    font-size: 2.4rem; /* agranda un poco en mobile */
+    letter-spacing: 0.14em;
+    padding: 1.6rem 0;
+  }
 }
+
+/* Ajuste responsivo */
+@media (max-width: 768px) {
+  .calendar-title {
+    font-size: 2.4rem;
+    letter-spacing: 0.14em;
+    padding: 1.5rem 0;
+  }
+}
+
+/* === TÍTULO PRINCIPAL DEL CALENDARIO — NÍTIDO Y COLORIDO === */
+.calendar-title {
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 2.2rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 1.2rem 0;
+  margin: 0 auto;
+  color: #fff;
+
+  /* Resplandor colorido tipo neón */
+  text-shadow:
+    0 0 6px rgba(139, 92, 246, 0.7),   /* violeta */
+    0 0 12px rgba(236, 72, 153, 0.6),  /* rosado */
+    0 0 22px rgba(34, 211, 238, 0.5);  /* celeste */
+
+  /* Efecto suave de brillo */
+  animation: titleGlow 4s ease-in-out infinite alternate;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@keyframes titleGlow {
+  0% {
+    text-shadow:
+      0 0 6px rgba(139, 92, 246, 0.7),
+      0 0 12px rgba(236, 72, 153, 0.6),
+      0 0 22px rgba(34, 211, 238, 0.5);
+  }
+  100% {
+    text-shadow:
+      0 0 12px rgba(139, 92, 246, 0.9),
+      0 0 24px rgba(236, 72, 153, 0.8),
+      0 0 36px rgba(34, 211, 238, 0.7);
+  }
+}
+
+/* === CORRECCIÓN FINAL: TÍTULO IGUAL AL DE LA WEB EN EXPORT === */
+.export-clean .calendar-title,
+.export-desktop .calendar-title {
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 2.4rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.12em !important;
+  background: linear-gradient(90deg, #a855f7, #ec4899, #22d3ee) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  text-shadow:
+    0 0 10px rgba(139, 92, 246, 0.7),
+    0 0 20px rgba(236, 72, 153, 0.6),
+    0 0 30px rgba(34, 211, 238, 0.5) !important;
+  filter: brightness(1.2) contrast(1.1) !important;
+  background-color: transparent !important;
+  animation: none !important;
+  opacity: 1 !important;
+  transform: scale(1.05);
+}
+/* === FIX PARA EXPORT (compatibilidad html2canvas) === */
+.export-desktop .calendar-title {
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 2.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
+  color: #ffffff !important;
+  background: none !important;
+  text-shadow:
+    0 0 5px #a855f7,
+    0 0 10px #ec4899,
+    0 0 20px #22d3ee,
+    0 0 40px #a855f7 !important;
+}
+

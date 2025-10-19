@@ -415,7 +415,7 @@ clone.querySelectorAll("*").forEach((el) => {
     safeContainer.style.left = "-9999px";
     safeContainer.style.top = "0";
     safeContainer.style.background = "#0b1020";
-    safeContainer.style.padding = "110px 30px 110px 30px"; // margen uniforme alrededor
+    safeContainer.style.padding = "50px 0px "; // margen uniforme alrededor
     safeContainer.style.display = "flex";
     safeContainer.style.alignItems = "center";
     safeContainer.style.justifyContent = "center";
@@ -441,23 +441,60 @@ clone.querySelectorAll(".sticky-col, .sticky-col-2, thead th").forEach((el) => {
   el.style.transform = "none";
 });
 
+    // === FIX de nitidez para el título durante export ===
+const title = clone.querySelector(".calendar-title");
+if (title) {
+  // 🔹 Versión export más nítida, con color sólido y contorno brillante
+  title.style.background = "none";
+  title.style.webkitBackgroundClip = "unset";
+  title.style.webkitTextFillColor = "#fff";
+  title.style.color = "#fff";
+  title.style.textShadow = `
+    0 0 8px rgba(255,255,255,0.9),
+    0 0 14px rgba(168,85,247,0.8),
+    0 0 25px rgba(236,72,153,0.6)
+  `;
+  title.style.filter = "none";
+  title.style.opacity = "1";
+  title.style.fontSmoothing = "antialiased";
+}
 
-    
 
 
-    // Captura completa sin cortar filas ni bordes
-    const blob =
-      format === "jpeg"
-        ? await domtoimage.toJpeg(safeContainer, {
-            quality: 1,
-            bgcolor: "#0b1020",
-            style: { backgroundColor: "#0b1020" },
-          })
-        : await domtoimage.toPng(safeContainer, {
-            quality: 1,
-            bgcolor: "#0b1020",
-            style: { backgroundColor: "#0b1020" },
-          });
+// Captura completa sin cortar filas ni bordes
+const scale = 3; // Aumenta la resolución (2 = HD, 3 = FullHD, 4 = 4K)
+
+const blob =
+  format === "jpeg"
+    ? await domtoimage.toJpeg(safeContainer, {
+        quality: 1,
+        bgcolor: "#0b1020",
+        style: {
+          backgroundColor: "#0b1020",
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          width: `${safeContainer.offsetWidth}px`,
+          height: `${safeContainer.offsetHeight}px`,
+        },
+        width: safeContainer.offsetWidth * scale,
+        height: safeContainer.offsetHeight * scale,
+      })
+    : await domtoimage.toPng(safeContainer, {
+        quality: 1,
+        bgcolor: "#0b1020",
+        style: {
+          backgroundColor: "#0b1020",
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          width: `${safeContainer.offsetWidth}px`,
+          height: `${safeContainer.offsetHeight}px`,
+        },
+        width: safeContainer.offsetWidth * scale,
+        height: safeContainer.offsetHeight * scale,
+      });
+
+
+
 
     // Limpieza
     document.body.removeChild(safeContainer);
@@ -539,8 +576,8 @@ clone.querySelectorAll(".sticky-col, .sticky-col-2, thead th").forEach((el) => {
 
     <div className="grid grid-cols-3 gap-3">
       {[
-        { label: "ON (hs)", value: hoursLight, setter: setHoursLight },
-        { label: "OFF (hs)", value: hoursDark, setter: setHoursDark },
+        { label: <>HORAS<br />ON</>, value: hoursLight, setter: setHoursLight },
+        { label: <>HORAS<br />OFF</>, value: hoursDark, setter: setHoursDark },
         { label: "Duración (días)", value: durationDays, setter: setDurationDays },
       ].map((f, i) => (
         <div key={i}>
@@ -721,29 +758,10 @@ clone.querySelectorAll(".sticky-col, .sticky-col-2, thead th").forEach((el) => {
     <thead>
   {/* === Título principal === */}
   <tr>
-   <th
-  colSpan={26}
-  style={{
-    fontFamily: "'Orbitron', 'Rajdhani', 'Inter', sans-serif",
-    fontWeight: "900",
-    fontSize: "1.75rem", // mantiene el tamaño actual
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    textAlign: "center",
-    background: "transparent",
-    padding: "1rem 0",
-    backgroundImage: "linear-gradient(90deg,#a855f7,#ec4899,#22d3ee)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    textShadow: `
-      0 0 10px rgba(168,85,247,0.6),
-      0 0 20px rgba(236,72,153,0.4)
-    `,
-    borderBottom: "2px solid rgba(236,72,153,0.3)",
-  }}
->
+   <th colSpan={26} className="calendar-title">
   CALENDARIO SUPERCICLO
 </th>
+
 
 
 
