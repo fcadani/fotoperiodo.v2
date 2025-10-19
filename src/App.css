@@ -1,22 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
 
+/* === VARIABLES === */
 :root {
-  --bg-1: #0b1020;          /* Fondo base oscuro */
-  --bg-2: #111827;          /* Fondo intermedio */
+  --bg-1: #0b1020;
+  --bg-2: #111827;
   --card: rgba(17, 24, 39, 0.85);
   --muted: #9aa4b2;
-  --accent: #6366f1;        /* Indigo */
+  --accent: #6366f1;
   --accent-700: #4f46e5;
   --accent-pink: #f472b6;
   --superciclo-red: #ef4444;
   --highlight-now: rgba(244, 114, 182, 0.95);
-  --text-primary: #f3f4f6;   /* Texto principal claro */
-  --text-secondary: #d1d5db; /* Texto suave */
+  --text-primary: #f3f4f6;
+  --text-secondary: #d1d5db;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --bg-1: #f1f5f9;        /* Fondo claro */
+    --bg-1: #f1f5f9;
     --bg-2: #e2e8f0;
     --card: #ffffff;
     --muted: #475569;
@@ -25,283 +26,989 @@
     --accent-pink: #db2777;
     --superciclo-red: #dc2626;
     --highlight-now: rgba(244, 114, 182, 0.7);
-    --text-primary: #0f172a; /* Texto oscuro fuerte */
+    --text-primary: #0f172a;
     --text-secondary: #1e293b;
   }
 }
 
-/* font */
-.font-inter { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-
-/* Global text clarity: strong contrast for primary text */
+/* === BASE === */
 body, .app-root {
   background: var(--bg-1);
   color: var(--text-primary);
   font-family: 'Inter', system-ui, sans-serif;
   transition: background 0.3s ease, color 0.3s ease;
 }
+
 .container {
   background: var(--card);
   color: var(--text-primary);
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 0 40px rgba(0,0,0,0.3);
 }
-@media (prefers-color-scheme: light) {
-  body, .font-inter, .app-root {
-    color: var(--text-dark-strong);
-  }
-}
 
-/* Ensure all text elements inherit the strong color */
-input, button, th, td, label, p, h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary) !important;
-}
-
-input {
-  background-color: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-}
-
-@media (prefers-color-scheme: light) {
-  input {
-    background-color: #f8fafc;
-    border: 1px solid #cbd5e1;
-  }
-}
-
-
-@media (prefers-color-scheme: light) {
-  input[type="number"],
-  input[type="datetime-local"],
-  input[type="text"] {
-    background-color: rgba(0,0,0,0.03);
-    color: var(--text-dark-strong);
-    border: 1px solid rgba(0,0,0,0.08);
-  }
-}
-
-input::placeholder { color: rgba(255,255,255,0.5); }
-@media (prefers-color-scheme: light) { input::placeholder { color: rgba(0,0,0,0.45); } }
-
-input:focus {
-  outline: none;
-  box-shadow: 0 8px 30px rgba(79,70,229,0.12);
-  border-color: var(--accent);
-}
-
-/* datetime text visibility on webkit */
-input[type="datetime-local"]::-webkit-datetime-edit-text { color: inherit; }
-input[type="datetime-local"]::-webkit-datetime-edit-year-field,
-input[type="datetime-local"]::-webkit-datetime-edit-month-field,
-input[type="datetime-local"]::-webkit-datetime-edit-day-field,
-input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
-input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
-  color: inherit;
-}
-
-/* Buttons */
-.btn {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.6rem;
-  font-weight: 600;
-  display: inline-flex;
+/* === TABLA BASE === */
+.calendar {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-/* Calendar cell text clarity + subtle glow */
-.calendar-cell-text {
-  text-shadow: 0 0 6px rgba(0,0,0,0.18);
-  -webkit-text-stroke: 0.01px rgba(0,0,0,0.05);
-}
-
-/* Now cell highlight */
-.now-cell {
-  box-shadow: 0 8px 32px rgba(244,114,182,0.14);
-  transform: scale(1.03);
-  border: 2px solid var(--highlight-now);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-}
-
-/* small responsive tweaks */
-@media (max-width: 640px) {
-  .hide-sm { display: none; }
-  .small-text { font-size: 0.82rem; }
-}
-
-/* === MOBILE OPTIMIZATIONS === */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-    border-radius: 1rem;
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .header-title h1 {
-    font-size: 1.5rem;
-  }
-
-  .download-buttons {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .main-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .config, .status {
-    padding: 1rem;
-  }
-
-  .config input {
-    font-size: 1rem;
-    padding: 0.6rem;
-  }
-
-  .calendar {
-    overflow-x: auto;
-    border-radius: 0.75rem;
-  }
-
-  .calendar table {
-    font-size: 0.9rem;
-  }
-
-  .btn {
-    font-size: 0.85rem;
-    width: auto;
-    padding: 0.4rem 0.7rem;
-  }
-
-  .superciclo-value {
-    font-size: 2rem;
-  }
-
-  .estado {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.9rem;
-  }
-}
-
-html {
-  color-scheme: dark !important;
-}
-/* === CALENDARIO FIJO Y RESPONSIVO === */
-.calendar-wrapper {
-  overflow: auto;
-  max-width: 100%;
-  max-height: 80vh;
-  position: relative;
-  border-radius: 0.75rem;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(99,102,241,0.4) transparent;
-}
-
-/* Mejor visibilidad en scroll horizontal */
-.calendar-wrapper::after {
-  content: "";
-  position: sticky;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 1rem;
-  background: linear-gradient(to left, var(--bg-1), transparent);
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* Tabla del calendario */
-.calendar table {
-  border-collapse: separate;
-  border-spacing: 0;
   width: 100%;
+  margin: 0 auto;
+  padding: 0.3rem 0;
 }
 
-/* === Cabecera fija (fila de horas) === */
+.calendar-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* === TABLA SIN ESPACIADOS === */
+.calendar table {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  margin: 0 auto;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* === CELDAS COMPACTAS === */
+.calendar td,
+.calendar th {
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  border-collapse: collapse !important;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* === ANCHOS DE COLUMNAS === */
+.calendar td.sticky-col,
+.calendar th.sticky-col {
+  width: 2rem !important;
+  min-width: 2rem !important;
+  text-align: center;
+}
+.calendar td.sticky-col-2,
+.calendar th.sticky-col-2 {
+  width: 2.8rem !important;
+  min-width: 2.8rem !important;
+  text-align: center;
+}
+
+/* === CELDAS DE HORAS === */
+.calendar td div {
+  width: 1.6rem !important;
+  height: 1.6rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.6rem !important;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.15s ease-in-out;
+}
+
+/* === COLORES DE LAS CELDAS === */
+.calendar td[data-type="L"] div {
+  background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+}
+.calendar td[data-type="D"] div {
+  background: linear-gradient(135deg, #2b2e83 0%, #1a1c4b 100%);
+}
+
+/* === CABECERA FIJA === */
 .calendar thead th {
   position: sticky;
   top: 0;
-  z-index: 40;
-  background: rgba(17, 24, 39, 0.95);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 50;
+  background: rgba(17, 24, 39, 0.98);
+  backdrop-filter: blur(4px);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.25rem 0.15rem !important;
+  text-align: center !important;
 }
 
-/* === Columnas fijas === */
-
-/* Columna 1: Día */
+/* === COLUMNAS FIJAS === */
 .sticky-col {
   position: sticky;
   left: 0;
-  z-index: 35;
-  background: rgba(17, 24, 39, 0.92);
-  backdrop-filter: blur(4px);
-  box-shadow: 2px 0 4px rgba(0,0,0,0.3);
+  background: rgba(17, 24, 39, 0.98);
+  z-index: 45;
 }
-
-/* Columna 2: Fecha */
 .sticky-col-2 {
   position: sticky;
-  left: 3.2rem; /* ajusta si cambia el ancho de la columna “Día” */
-  z-index: 30;
-  background: rgba(17, 24, 39, 0.92);
-  backdrop-filter: blur(4px);
-  box-shadow: 2px 0 4px rgba(0,0,0,0.25);
+  left: 2rem; /* coincide con col Día */
+  background: rgba(17, 24, 39, 0.98);
+  z-index: 40;
 }
 
-/* === Mobile tweaks === */
-@media (max-width: 768px) {
-  .calendar td div {
-    height: 1.6rem;
-    font-size: 0.7rem;
-  }
+/* === CELDA ACTUAL === */
+.now-cell div {
+  border: 2px solid var(--highlight-now) !important;
+  box-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
+  transform: scale(1.03);
+  z-index: 10;
+}
 
+/* === EXPORTACIÓN (sin bordes blancos) === */
+.exporting .calendar-wrapper {
+  background: var(--bg-1);
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+}
+.exporting .calendar table {
+  background: var(--bg-1);
+  margin: 0;
+  padding: 0;
+}
+.exporting .calendar td div {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* === MÓVIL (VERSIÓN COMPACTA) === */
+@media (max-width: 768px) {
   .calendar-wrapper {
-    max-height: 70vh;
-    border-radius: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    padding: 0;
   }
 
   .calendar thead th {
-    font-size: 0.7rem;
-    padding: 0.4rem;
+    font-size: 0.65rem !important;
+    padding: 0.1rem !important;
   }
 
-  .sticky-col,
+  .calendar td div {
+    width: 1rem !important;
+    height: 1rem !important;
+    line-height: 1rem !important;
+    font-size: 0.55rem !important;
+  }
+
+  .sticky-col {
+    left: 0;
+    width: 1.6rem !important;
+    min-width: 1.6rem !important;
+  }
+
   .sticky-col-2 {
-    font-size: 0.7rem;
-    min-width: 3rem;
+    left: 1.6rem; /* respeta espacio fijo sin superposición */
+    width: 2.4rem !important;
+    min-width: 2.4rem !important;
   }
+
+  .calendar td, .calendar th {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .calendar-container {
+    padding: 0.25rem;
+  }
+
+  .calendar-table td,
+  .calendar-table th {
+    padding: 4px;
+    font-size: 0.75rem;
+    min-width: 26px;
+  }
+  
 }
 
-input {
-  transition: all 0.2s ease;
-  border-radius: 0.5rem;
+/* === FONDO GLOBAL === */
+html, body {
+  background-color: var(--bg-1) !important;
+  color: var(--text-primary) !important;
 }
-input:focus {
-  transform: scale(1.01);
+/* === CORRECCIÓN EXPORTACIÓN JPG === */
+
+/* Forzar fondo igual al del sitio */
+.export-clean,
+.export-clean * {
+  background-color: #0b1020 !important;  /* mismo que --bg-1 */
+  background: #0b1020 !important;
+  color: #f3f4f6 !important;
 }
 
-.btn:hover {
-  filter: brightness(1.15);
+/* Evitar que las columnas sticky se superpongan */
+.calendar th,
+.calendar td {
+  position: static !important;
+}
+
+/* Quitar bordes extra al exportar */
+.export-clean {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Centrar y ajustar la tabla para que se exporte completa */
+.export-clean table {
+  width: auto !important;
+  margin: 0 auto !important;
+  border-collapse: collapse !important;
+  background-color: #0b1020 !important;
+}
+.section-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  color: var(--accent-700, #a5b4fc);
+  text-transform: uppercase;
+  position: relative;
+  margin: 0.75rem auto 1rem;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 3px;
+  margin: 0.4rem auto 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #6366f1, #ec4899, #6366f1);
+  background-size: 200% 100%;
+  animation: gradient-move 3s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+/* === Estilo general de las tarjetas principales === */
+section, aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at top left, rgba(17, 24, 39, 0.8), rgba(9, 12, 26, 0.95));
+  box-shadow: 0 0 20px rgba(100, 100, 255, 0.05), inset 0 0 12px rgba(255, 255, 255, 0.04);
+  transition: all 0.4s ease;
+}
+
+section:hover, aside:hover {
+  box-shadow: 0 0 25px rgba(125, 110, 255, 0.25), 0 0 10px rgba(255, 100, 200, 0.25);
+  transform: translateY(-2px);
+}
+
+/* === Títulos principales estilo futurista === */
+.section-title {
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+  color: #b5b9ff;
+  text-transform: uppercase;
+  position: relative;
+  margin: 1rem auto 1.2rem;
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
+  text-shadow: 0 0 6px rgba(120, 100, 255, 0.8), 0 0 15px rgba(236, 72, 153, 0.4);
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 3px;
+  margin: 0.5rem auto 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #6366f1, #ec4899, #8b5cf6);
+  background-size: 200% 100%;
+  animation: gradient-move 3s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* === Estilo especial para el título principal SUPERCICLO === */
+h1 {
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  background: linear-gradient(90deg, #6366f1, #ec4899, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 15px rgba(125, 110, 255, 0.5), 0 0 25px rgba(236, 72, 153, 0.4);
+}
+
+
+/* === Botones hover suaves === */
+button, label[for] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover, label:hover {
   transform: translateY(-1px);
-}
-.btn:active {
-  transform: translateY(0);
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
 }
 
-@media (max-width: 500px) {
-  .status, .config {
-    font-size: 0.85rem;
+.section-title {
+  text-align: center;
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(90deg,#a855f7,#ec4899,#22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 15px rgba(168,85,247,0.6), 0 0 25px rgba(236,72,153,0.4);
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 1px;
+  margin: 0.1rem auto 0;
+  background: linear-gradient(90deg,#f472b6,#8b5cf6);
+  border-radius: 9999px;
+}
+/* === Animación glow-pulse futurista === */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.4), 0 0 25px rgba(250, 204, 21, 0.3);
+    transform: scale(1);
   }
-  .calendar table {
+  50% {
+    box-shadow: 0 0 22px rgba(250, 204, 21, 0.8), 0 0 45px rgba(250, 204, 21, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+/* Variante para el estado OFF */
+@keyframes glow-pulse-off {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.4), 0 0 25px rgba(99, 102, 241, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(99, 102, 241, 0.7), 0 0 45px rgba(99, 102, 241, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+/* Clase genérica */
+.glow-anim-on {
+  animation: glow-pulse 2.4s infinite ease-in-out;
+}
+
+.glow-anim-off {
+  animation: glow-pulse-off 2.4s infinite ease-in-out;
+}
+/* === MOBILE OPTIMIZADO === */
+@media (max-width: 768px) {
+  /* Alinear inputs en columna homogénea */
+  #export-area input {
+    width: 100% !important;
+    text-align: center;
+  }
+
+  #export-area .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  #export-area label {
+    text-align: center;
     font-size: 0.8rem;
   }
+
+  /* Ajuste de calendario */
+  .calendar-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-left: 1rem; /* evita que se corte Día */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  .calendar table {
+    min-width: max-content;
+  }
+
+  /* Que las columnas fijas no tapen */
+  .sticky-col,
+  .sticky-col-2 {
+    background: rgba(15, 20, 40, 0.95);
+    backdrop-filter: blur(3px);
+  }
+}
+
+/* === MARCADOR LLAMATIVO DE CELDA ACTUAL === */
+.now-cell div {
+  border: 2px solid #f472b6 !important;
+  box-shadow:
+    0 0 12px rgba(236, 72, 153, 0.8),
+    0 0 24px rgba(147, 51, 234, 0.7),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+  animation: pulse-now 2s infinite ease-in-out;
+}
+
+@keyframes pulse-now {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 10px rgba(236, 72, 153, 0.7),
+      0 0 20px rgba(147, 51, 234, 0.6);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 18px rgba(236, 72, 153, 0.9),
+      0 0 30px rgba(147, 51, 234, 0.8);
+  }
+}
+
+/* === BOTONES GLOBALES (desktop + mobile) === */
+#export-area .flex.flex-wrap.gap-2.mt-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  justify-items: center;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+#export-area button,
+#export-area label {
+  width: 100%;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.2);
+  transition: all 0.25s ease-in-out;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Efecto neón futurista general */
+#export-area button:hover,
+#export-area label:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.45), 0 0 8px rgba(99, 102, 241, 0.4);
+  filter: brightness(1.1);
+}
+
+/* Importar config (verde) */
+#export-area label[for] {
+  background: linear-gradient(90deg, #10b981, #047857);
+  color: #fff;
+}
+
+/* Exportar JSON (indigo) */
+#export-area button.bg-indigo-500 {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+/* Descargar JPG (rosado) */
+#export-area button.bg-pink-400 {
+  background: linear-gradient(90deg, #ec4899, #f472b6);
+  color: #111;
+}
+
+/* Reset (gris con degradado oscuro) */
+#export-area button.bg-gray-600 {
+  background: linear-gradient(90deg, #374151, #1f2937);
+  color: #f3f4f6;
+}
+
+/* Ajuste responsive */
+@media (max-width: 768px) {
+  #export-area .flex.flex-wrap.gap-2.mt-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  #export-area button,
+  #export-area label {
+    font-size: 0.85rem;
+    padding: 0.75rem 0.5rem;
+  }
+}
+/* Celdas */
+.calendar-table td,
+.calendar-table th {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  color: white;
+  min-width: 30px;
+  height: 28px;
+}
+
+
+/* === CORRECCIÓN FINAL: VISUALIZACIÓN COMPLETA DEL CALENDARIO === */
+.calendar-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-left: 0.5rem; /* 🔹 Añade espacio para que no se corte la primera columna */
+  padding-right: 0.5rem;
+}
+
+/* Evita que el scroll o padding recorte las columnas sticky */
+.calendar {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+/* Ajusta la posición sticky correctamente */
+.sticky-col {
+  left: 0 !important;
+  z-index: 10;
+}
+.sticky-col-2 {
+  left: 2rem !important; /* igual que el ancho de la primera columna */
+  z-index: 9;
+}
+
+/* En móviles, da más espacio a la izquierda */
+@media (max-width: 768px) {
+  .calendar-wrapper {
+    padding-left: 1rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .calendar td div {
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+    font-size: 0.55rem !important;
+  }
+}
+
+/* === CONTENEDOR CALENDARIO === */
+.calendar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 1rem;
+}
+
+
+/* === CELDA ACTUAL DESTACADA === */
+.now-cell div {
+  border: 2px solid #f472b6 !important;
+  box-shadow:
+    0 0 12px rgba(236, 72, 153, 0.9),
+    0 0 24px rgba(99, 102, 241, 0.7),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+  animation: glowPulseNow 1.8s ease-in-out infinite;
+}
+
+@keyframes glowPulseNow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 10px rgba(236, 72, 153, 0.8),
+      0 0 25px rgba(99, 102, 241, 0.6);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow:
+      0 0 18px rgba(236, 72, 153, 1),
+      0 0 35px rgba(147, 51, 234, 0.8);
+  }
+}
+/* === OPTIMIZACIÓN DE ESPACIADO ENTRE COLUMNAS === */
+.calendar table {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+}
+
+.calendar td,
+.calendar th {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.calendar td div {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 2px !important;
+}
+
+/* === FILA ACTUAL DESTACADA === */
+.current-day-row td div {
+  position: relative;
+  background: linear-gradient(90deg, #4338ca 0%, #312e81 100%);
+  box-shadow: inset 0 0 8px rgba(147, 51, 234, 0.3);
+}
+
+.current-day-row td[data-type="L"] div {
+  background: linear-gradient(90deg, #f59e0b, #f472b6);
+}
+
+.current-day-row td[data-type="D"] div {
+  background: linear-gradient(90deg, #312e81, #1e1b4b);
+}
+
+/* Contorno brillante para toda la fila actual */
+.current-day-row td:first-child div::before,
+.current-day-row td:last-child div::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  border: 1px solid rgba(236, 72, 153, 0.6);
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+  z-index: 5;
+}
+
+/* === CELDA ACTUAL (hora exacta) === */
+.now-cell div {
+  border: 2px solid #f472b6 !important;
+  box-shadow:
+    0 0 15px rgba(236, 72, 153, 0.8),
+    0 0 35px rgba(147, 51, 234, 0.6),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.06);
+  z-index: 10;
+  animation: glowPulseNow 2s ease-in-out infinite;
+}
+
+@keyframes glowPulseNow {
+  0%, 100% {
+    transform: scale(1.05);
+    box-shadow:
+      0 0 10px rgba(236, 72, 153, 0.7),
+      0 0 25px rgba(147, 51, 234, 0.5);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 20px rgba(236, 72, 153, 0.9),
+      0 0 40px rgba(147, 51, 234, 0.7);
+  }
+}
+
+/* === MOBILE: SIN ESPACIADOS Y AJUSTADO === */
+@media (max-width: 768px) {
+  .calendar td div {
+    width: 1rem !important;
+    height: 1rem !important;
+    font-size: 0.55rem !important;
+    border-radius: 1px !important;
+  }
+
+  .calendar th {
+    font-size: 0.6rem !important;
+  }
+}
+/* === REFINAMIENTO VISUAL DE CELDAS === */
+.calendar td div {
+  width: 1.8rem !important;
+  height: 1.8rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  border: none !important;
+  transition: all 0.15s ease-in-out;
+}
+
+/* === REDUCCIÓN DE ESPACIOS OSCUROS ENTRE CELDAS === */
+.calendar td,
+.calendar th {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-collapse: collapse !important;
+}
+.calendar table {
+  border-spacing: 0 !important;
+  border-collapse: collapse !important;
+}
+
+/* === FILA ACTUAL — RESALTADO MÁS FUERTE === */
+.current-day-row td div {
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(230, 77, 6, 0.25), 0 0 30px rgba(230, 153, 11, 0.2);
+  filter: brightness(.95);
+}
+
+.current-day-row td:first-child div::before,
+.current-day-row td:last-child div::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: -2px;
+  bottom: -2px;
+  border-radius: 6px;
+  border: 4px solid rgba(236, 72, 153, 0.6);
+  box-shadow: 0 0 50px rgba(236, 72, 153, 0.6), 0 0 50px rgba(147, 51, 234, 0.4);
+  pointer-events: none;
+}
+
+/* === CELDA ACTUAL — EFECTO NEÓN MÁS FUERTE === */
+.now-cell div {
+  border: 4px solid #f472b6 !important;
+  box-shadow:
+    0 0 20px rgba(236, 72, 153, 0.9),
+    0 0 40px rgba(147, 51, 234, 0.8),
+    0 0 60px rgba(147, 51, 234, 0.6),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+  z-index: 15;
+  animation: neonPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+  0%, 100% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 25px rgba(236, 72, 153, 0.8),
+      0 0 50px rgba(147, 51, 234, 0.7);
+  }
+  50% {
+    transform: scale(1.14);
+    box-shadow:
+      0 0 35px rgba(236, 72, 153, 1),
+      0 0 70px rgba(147, 51, 234, 0.9);
+  }
+}
+
+/* === MOBILE OPTIMIZADO === */
+@media (max-width: 768px) {
+  .calendar td div {
+    width: 1.2rem !important;
+    height: 1.2rem !important;
+    border-radius: 3px !important;
+  }
+
+  .calendar thead th {
+    font-size: 0.65rem !important;
+    padding: 0.15rem !important;
+  }
+
+  .current-day-row td:first-child div::before,
+  .current-day-row td:last-child div::after {
+    border: 1.5px solid rgba(236, 72, 153, 0.6);
+  }
+
+  .now-cell div {
+    border-width: 2px !important;
+    transform: scale(1.08);
+  }
+}
+/* === ENSANCHAR CUADROS DE COLOR Y ELIMINAR ESPACIOS VERTICALES === */
+.calendar td div {
+  width: 2rem !important;       /* Aumenta el ancho de cada celda */
+  height: 1.6rem !important;    /* Mantiene altura proporcional */
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  border: none !important;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Elimina cualquier separación vertical entre columnas */
+.calendar td,
+.calendar th {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-spacing: 0 !important;
+  border-collapse: collapse !important;
+}
+
+.calendar table {
+  border-spacing: 0 !important;
+  border-collapse: collapse !important;
+  width: max-content;
+  margin: 0 auto;
+}
+
+/* === VERSIÓN MOBILE: MISMA PROPORCIÓN, LIGERAMENTE MÁS COMPACTA === */
+@media (max-width: 768px) {
+  .calendar td div {
+    width: 1.4rem !important;   /* Ancho reducido proporcional */
+    height: 1.2rem !important;
+    border-radius: 3px !important;
+  }
+
+  .calendar thead th {
+    font-size: 0.65rem !important;
+    padding: 0.1rem !important;
+  }
+}
+/* === EXPORTACIÓN LIMPIA (elimina bordes blancos) === */
+.export-clean,
+.export-clean * {
+  background-color: #0b1020 !important;
+  color: #f3f4f6 !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+}
+
+/* Asegura que no haya halos */
+.export-clean table,
+.export-clean td,
+.export-clean th {
+  border: none !important;
+  background: #0b1020 !important;
+}
+
+
+.calendar-title {
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+/* === Forzar estilo escritorio en exportaciones (evita media queries móviles) === */
+.export-desktop .calendar-wrapper {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  padding: 0 !important;
+}
+
+.export-desktop table {
+  width: auto !important;
+  min-width: auto !important;
+  max-width: none !important;
+}
+
+.export-desktop td,
+.export-desktop th {
+  font-size: 0.75rem !important; /* igual al escritorio */
+  padding: 0 !important;
+}
+/* === Forzar modo escritorio en export (para que móvil use las mismas proporciones === */
+.export-desktop,
+.export-desktop * {
+  font-size: 0.75rem !important;
+  transform: none !important;
+  zoom: 1 !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 4px !important;
+  letter-spacing: normal !important;
+}
+
+/* Evita que se apliquen media queries móviles dentro del clon */
+.export-desktop .calendar td div,
+.export-desktop .calendar thead th {
+  width: 2rem !important;
+  height: 1.6rem !important;
+  font-size: 0.75rem !important;
+  padding: 0 !important;
+}
+
+/* Título igual en todos los dispositivos */
+.export-desktop .calendar-title {
+  font-size: 1.9rem !important;
+  letter-spacing: 0.08em !important;
+  text-shadow:
+    0 0 8px rgba(139, 92, 246, 0.8),
+    0 0 15px rgba(236, 72, 153, 0.6);
+}
+/* === TÍTULO PRINCIPAL DEL CALENDARIO === */
+.calendar-title,
+th[colspan="26"] {
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
+  font-size: 2.2rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: #ffffff !important;
+  background: linear-gradient(90deg, #3b82f6, #ec4899, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 
+    0 0 15px rgba(99, 102, 241, 0.6),
+    0 0 30px rgba(236, 72, 153, 0.5),
+    0 0 45px rgba(34, 211, 238, 0.4);
+  padding: 1rem 0 !important;
+  background-color: transparent !important;
+}
+
+/* === IGUAL ESTILO EN EXPORT === */
+.export-desktop .calendar-title,
+.export-desktop th[colspan="26"] {
+  font-size: 2.2rem !important;
+  text-shadow: 
+    0 0 18px rgba(139, 92, 246, 0.8),
+    0 0 32px rgba(236, 72, 153, 0.6);
+}
+/* === Estilo mejorado para el título del calendario === */
+.calendar-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.6),
+               0 0 20px rgba(236, 72, 153, 0.4),
+               0 0 30px rgba(6, 182, 212, 0.2);
+  padding: 14px 0;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+  background-color: rgba(15, 15, 35, 0.85);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+/* ✨ Animación leve de brillo (opcional) */
+@keyframes glowPulse {
+  0% {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.6),
+                 0 0 20px rgba(236, 72, 153, 0.4),
+                 0 0 30px rgba(6, 182, 212, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 18px rgba(139, 92, 246, 0.8),
+                 0 0 35px rgba(236, 72, 153, 0.6),
+                 0 0 45px rgba(6, 182, 212, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.6),
+                 0 0 20px rgba(236, 72, 153, 0.4),
+                 0 0 30px rgba(6, 182, 212, 0.2);
+  }
+}
+
+/* Para activar el efecto animado: */
+.calendar-title {
+  animation: glowPulse 4s ease-in-out infinite;
 }

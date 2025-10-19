@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Sun, Moon, Download, Upload, RefreshCw, Zap } from "lucide-react";
 import html2canvas from "html2canvas";
 import "./App.css";
+import domtoimage from "dom-to-image-more";
 
 const STORAGE_KEY = "fotoperiodo_settings_v1";
 
@@ -50,9 +51,11 @@ export default function App() {
 
   const [now, setNow] = useState(new Date());
   const [errorMsg, setErrorMsg] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
   // ref for calendar export
-  const calendarRef = useRef(null)
+  const calendarRef = useRef(null);
+
 
   // ---- Load saved settings on mount ----
   useEffect(() => {
@@ -158,17 +161,8 @@ useEffect(() => {
         inline: "center",
       });
     }
-
-    // 🔆 Agrega un parpadeo visual temporal
-    el.classList.add("glow");
-    const timeout = setTimeout(() => {
-      el.classList.remove("glow");
-    }, 1600); // dura 1.6s
-
-    return () => clearTimeout(timeout);
   }
 }, []); // ← Solo se ejecuta una vez al montar
-
 
 
 
@@ -284,26 +278,207 @@ useEffect(() => {
   // run validation to show errors early
   useEffect(() => { validateInputs(); }, [validateInputs]);
 
-  // download calendar image using html2canvas (scale = 3 for higher res)
-  const downloadCalendarImage = useCallback(async (format = "png", scale = 3) => {
-    if (!calendarRef.current) return;
+// === Descargar calendario completo centrado sin recortes ni bordes ===
+const downloadCalendarImage = useCallback(async (format = "jpeg") => {
+  if (isExporting) return;
+  setIsExporting(true);
+
+  const node = document.querySelector(".calendar-wrapper");
+  if (!node) {
+    alert("❌ No se encontró el calendario para exportar.");
+    setIsExporting(false);
+    return;
+  }
+
+  try {
+    console.log("📸 Exportando calendario completo sin recortes...");
+
+    // === Clonar el contenedor visible del calendario ===
+        const clone = node.cloneNode(true);
+
+        // === Buscar la tabla interna y forzar versión de escritorio ===
+const table = clone.querySelector("table");
+if (table) {
+  const originalTable = node.querySelector("table");
+  const fullWidth = originalTable ? originalTable.scrollWidth : node.scrollWidth;
+
+  table.style.overflow = "visible";
+  table.style.width = `${fullWidth}px`;
+  table.style.minWidth = `${fullWidth}px`;
+  table.style.maxWidth = `${fullWidth}px`;
+  table.style.marginLeft = "0";
+  table.style.paddingLeft = "0";
+}
+
+// === Forzar estilos de escritorio para export, incluso en móvil ===
+clone.style.overflow = "visible";
+clone.style.width = `${node.scrollWidth}px`;
+clone.style.height = `${node.scrollHeight}px`;
+clone.style.minWidth = `${node.scrollWidth}px`;
+clone.style.maxWidth = "none";
+clone.style.boxSizing = "border-box";
+clone.scrollLeft = 0;
+clone.style.backgroundColor = "#0b1020";
+
+// 🔒 Forzar visualización estilo escritorio
+clone.classList.add("export-desktop");
+clone.querySelectorAll("*").forEach((el) => {
+  el.style.overflow = "visible";
+  el.style.maxWidth = "none";
+  el.style.transform = "none";
+  el.style.zoom = "1";
+  el.style.fontSize = "inherit";
+});
+
+        // Forzar visibilidad total (incluyendo hora 0)
+        if (table) {
+          const originalTable = node.querySelector("table");
+          const fullWidth = originalTable ? originalTable.scrollWidth : node.scrollWidth;
+
+          table.style.overflow = "visible";
+          table.style.width = `${fullWidth}px`;
+          table.style.minWidth = `${fullWidth}px`;
+          table.style.maxWidth = `${fullWidth}px`;
+          table.style.marginLeft = "0"; // Asegura que no se recorte la columna 0h
+          table.style.paddingLeft = "0";
+        }
+
+        // === Forzar export idéntico a escritorio (misma proporción en mobile) ===
+          const originalTable = node.querySelector("table");
+          if (originalTable) {
+            const fullWidth = originalTable.scrollWidth; // ancho completo del calendario
+            clone.style.width = `${fullWidth}px`;
+            clone.style.minWidth = `${fullWidth}px`;
+            clone.style.maxWidth = `${fullWidth}px`;
+          }
+
+          // Asegurar escala 1:1 como escritorio
+          clone.style.transform = "scale(1)";
+          clone.style.transformOrigin = "top left";
+          clone.style.zoom = "1";
+
+          // Evitar que el ancho se limite al viewport móvil
+          clone.style.maxWidth = "none";
+          clone.style.overflowX = "visible";
+          clone.style.overflowY = "visible";
+
+
+
+        // Ajustes del clon
+        clone.style.overflow = "visible";
+        clone.style.width = `${node.scrollWidth + 100}px`; // agrega margen de seguridad
+        clone.style.height = `${node.scrollHeight}px`;
+        clone.style.minWidth = `${node.scrollWidth}px`;
+        clone.style.boxSizing = "border-box";
+        clone.scrollLeft = 0;
+        clone.style.backgroundColor = "#0b1020";
+
+
+
+    // Fondo sólido
+    clone.style.background = "#0b1020";
+    clone.style.color = "#fff";
+    clone.style.margin = "0 auto";
+    clone.style.display = "flex";
+    clone.style.alignItems = "center";
+    clone.style.justifyContent = "center";
+
+    // 🔽 LIMPIEZA de bordes blancos y sombras (modo export limpio)
+    clone.classList.add("export-clean");
+    clone.querySelectorAll("*").forEach((el) => {
+      el.style.border = "none";
+      el.style.boxShadow = "none";
+      el.style.outline = "none";
+      el.style.backgroundClip = "border-box";
+      el.style.filter = "none";
+    });
+    // 🔼 FIN BLOQUE LIMPIEZA
+
+    // Inyectar estilos para mantener colores y gradientes
     try {
-      const canvas = await html2canvas(calendarRef.current, {
-        backgroundColor: null,
-        useCORS: true,
-        scale
-      });
-      const mime = format === "jpeg" ? "image/jpeg" : "image/png";
-      const dataUrl = canvas.toDataURL(mime, format === "jpeg" ? 0.92 : 1.0);
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `fotoperiodo_calendar.${format}`;
-      a.click();
-    } catch (err) {
-      console.error("Error exportando calendario:", err);
-      alert("No se pudo exportar la imagen. Ver consola para más info.");
-    }
-  }, []);
+      const style = document.createElement("style");
+      style.textContent = Array.from(document.styleSheets)
+        .map((sheet) => {
+          try {
+            return Array.from(sheet.cssRules).map((r) => r.cssText).join("\n");
+          } catch {
+            return "";
+          }
+        })
+        .join("\n");
+      clone.prepend(style);
+    } catch (e) {}
+
+    // Contenedor seguro fuera de pantalla
+    const safeContainer = document.createElement("div");
+    safeContainer.style.position = "fixed";
+    safeContainer.style.left = "-9999px";
+    safeContainer.style.top = "0";
+    safeContainer.style.background = "#0b1020";
+    safeContainer.style.padding = "110px 30px 110px 30px"; // margen uniforme alrededor
+    safeContainer.style.display = "flex";
+    safeContainer.style.alignItems = "center";
+    safeContainer.style.justifyContent = "center";
+    safeContainer.style.border = "none";
+    safeContainer.style.boxShadow = "none";
+    safeContainer.style.outline = "none";
+
+    // Añadir clon
+    safeContainer.appendChild(clone);
+    document.body.appendChild(safeContainer);
+
+    // Esperar render
+    await new Promise((r) => setTimeout(r, 300));
+
+    // 🔧 Corregir superposición y alineación de columnas sticky
+clone.querySelectorAll(".sticky-col, .sticky-col-2, thead th").forEach((el) => {
+  el.style.position = "static"; // elimina completamente el sticky
+  el.style.left = "auto";
+  el.style.top = "auto";
+  el.style.zIndex = "auto";
+  el.style.background = "#0b1020"; // fondo uniforme con el resto
+  el.style.boxShadow = "none";
+  el.style.transform = "none";
+});
+
+
+    
+
+
+    // Captura completa sin cortar filas ni bordes
+    const blob =
+      format === "jpeg"
+        ? await domtoimage.toJpeg(safeContainer, {
+            quality: 1,
+            bgcolor: "#0b1020",
+            style: { backgroundColor: "#0b1020" },
+          })
+        : await domtoimage.toPng(safeContainer, {
+            quality: 1,
+            bgcolor: "#0b1020",
+            style: { backgroundColor: "#0b1020" },
+          });
+
+    // Limpieza
+    document.body.removeChild(safeContainer);
+    clone.classList.remove("export-clean");
+
+    // Descargar
+    const a = document.createElement("a");
+    a.href = blob;
+    a.download = `fotoperiodo_calendar.${format}`;
+    a.click();
+
+    console.log("✅ Exportación completa y centrada sin recortes ni contornos blancos.");
+  } catch (err) {
+    console.error("❌ Error al exportar calendario:", err);
+    alert("No se pudo exportar correctamente la imagen.");
+  } finally {
+    setIsExporting(false);
+  }
+}, [isExporting]);
+
+
 
   // UI helpers
   const balanceColor = energyBalance > 0 ? 'text-emerald-400' : energyBalance < 0 ? 'text-rose-400' : 'text-gray-400';
@@ -331,225 +506,361 @@ useEffect(() => {
           </div>
         </header>
 
-        <main className="grid lg:grid-cols-3 gap-6">
-          {/* Configuration */}
-          <section className="lg:col-span-2 p-4 sm:p-6 rounded-xl border shadow-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--accent-700)' }}>Configuración</h2>
+        <main className="grid lg:grid-cols-2 gap-6 items-stretch">
+          {/* === CONFIGURACIÓN === */}
+<section
+  id="export-area"
+  className="p-6 rounded-xl border shadow-lg flex flex-col justify-between items-center text-center min-h-[480px]"
+  style={{
+    background: "rgba(255,255,255,0.02)",
+    boxShadow: "0 0 15px rgba(147, 51, 234, 0.15), inset 0 0 15px rgba(255,255,255,0.05)",
+    borderColor: "rgba(147, 51, 234, 0.3)",
+  }}
+>
+  <h2 className="section-title">CONFIGURACIÓN</h2>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm block mb-1" style={{ color: 'var(--muted)' }}>Fecha y hora de inicio</label>
-                <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-transparent outline-none" style={{ background: 'rgba(255,255,255,0.02)' }} />
-              </div>
+  {/* Inputs agrupados y centrados */}
+  <div className="w-full max-w-md mx-auto flex flex-col gap-5">
+    <div>
+      <label
+        className="text-sm block mb-1 uppercase font-semibold"
+        style={{ color: "var(--muted)" }}
+      >
+        Fecha y hora de inicio
+      </label>
+      <input
+        type="datetime-local"
+        value={startDate}
+        onChange={(e) => setStartDate(e.target.value)}
+        className="w-full p-3 rounded-lg border border-transparent outline-none text-center font-medium"
+        style={{ background: "rgba(255,255,255,0.04)", color: "#fff" }}
+      />
+    </div>
 
-              <div className="grid sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="text-sm block mb-1" style={{ color: 'var(--muted)' }}>ON (hs)</label>
-                  <input type="number" min="0" step="0.5" value={hoursLight}
-                    onChange={(e) => setHoursLight(clamp(Number(e.target.value), 0, 9999))}
-                    className="w-full p-3 rounded-lg border border-transparent outline-none" style={{ background: 'rgba(255,255,255,0.02)' }} />
-                </div>
+    <div className="grid grid-cols-3 gap-3">
+      {[
+        { label: "ON (hs)", value: hoursLight, setter: setHoursLight },
+        { label: "OFF (hs)", value: hoursDark, setter: setHoursDark },
+        { label: "Duración (días)", value: durationDays, setter: setDurationDays },
+      ].map((f, i) => (
+        <div key={i}>
+          <label
+            className="text-sm block mb-1 uppercase font-semibold"
+            style={{ color: "var(--muted)" }}
+          >
+            {f.label}
+          </label>
+          <input
+            type="number"
+            min={i === 2 ? "1" : "0"}
+            step="0.5"
+            value={f.value}
+            onChange={(e) => f.setter(clamp(Number(e.target.value), 0, 9999))}
+            className="w-full p-3 rounded-lg border border-transparent outline-none text-center font-medium"
+            style={{ background: "rgba(255,255,255,0.04)", color: "#fff" }}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
 
-                <div>
-                  <label className="text-sm block mb-1" style={{ color: 'var(--muted)' }}>OFF (hs)</label>
-                  <input type="number" min="0" step="0.5" value={hoursDark}
-                    onChange={(e) => setHoursDark(clamp(Number(e.target.value), 0, 9999))}
-                    className="w-full p-3 rounded-lg border border-transparent outline-none" style={{ background: 'rgba(255,255,255,0.02)' }} />
-                </div>
+  {/* Botones con estilo armonizado */}
+  <div className="flex flex-wrap justify-center gap-3 mt-8">
+    <label className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg cursor-pointer shadow-md hover:bg-emerald-700 transition">
+      <Upload className="w-4 h-4" /> Importar
+      <input
+        type="file"
+        accept="application/json"
+        onChange={(e) => handleImport(e.target.files?.[0])}
+        className="hidden"
+      />
+    </label>
 
-                <div>
-                  <label className="text-sm block mb-1" style={{ color: 'var(--muted)' }}>Duración (días)</label>
-                  <input type="number" min="1" max="9999" value={durationDays}
-                    onChange={(e) => setDurationDays(clamp(Number(e.target.value), 1, 9999))}
-                    className="w-full p-3 rounded-lg border border-transparent outline-none" style={{ background: 'rgba(255,255,255,0.02)' }} />
-                </div>
-              </div>
+    <button
+      onClick={handleExport}
+      className="flex items-center gap-2 px-3 py-2 text-sm bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-600 transition"
+    >
+      Exportar JSON
+    </button>
 
-              <div className="flex flex-wrap gap-2 mt-2">                
-                <label className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg cursor-pointer shadow-md hover:bg-emerald-700 transition">
-                  <Upload className="w-4 h-4"/> Importar config
-                  <input type="file" accept="application/json" onChange={(e) => handleImport(e.target.files?.[0])} className="hidden" />
-                </label>
+    <button
+      onClick={() => downloadCalendarImage("jpeg")}
+      disabled={isExporting}
+      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg shadow-md transition ${
+        isExporting
+          ? "bg-gray-500 text-gray-300 cursor-wait"
+          : "bg-pink-400 text-black hover:brightness-95"
+      }`}
+    >
+      <Download className="w-4 h-4" />
+      {isExporting ? "Exportando..." : "Descargar JPG"}
+    </button>
 
-                <button onClick={handleExport} className="flex items-center gap-2 px-3 py-2 text-sm bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-600 transition"> Exportar JSON </button>
+    <button
+      onClick={resetDefaults}
+      className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+    >
+      <RefreshCw className="w-4 h-4" /> Reset
+    </button>
+  </div>
 
-                <button onClick={resetDefaults} className="ml-auto flex items-center gap-2 px-3 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"> <RefreshCw className="w-4 h-4"/> Reset</button>
-              </div>
+  {errorMsg && (
+    <div className="text-sm text-red-400 mt-2 p-2 bg-red-900/20 rounded-lg w-full max-w-md">
+      {errorMsg}
+    </div>
+  )}
 
-              {errorMsg && <div className="text-sm text-red-400 mt-2 p-2 bg-red-900/20 rounded-lg">{errorMsg}</div>}
-            </div>
-          </section>
+
+</section>
+
 
           {/* Status */}
-          <aside className="p-4 sm:p-6 rounded-xl border shadow-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
-            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--accent-700)' }}>Estado</h3>
+          {/* Panel de Estado mejorado */}
+          <aside
+            className="p-6 rounded-xl border shadow-lg flex flex-col gap-6"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              minHeight: "100%",
+            }}
+          >
+            <h2 className="section-title">Estado</h2>
 
-            <div className="space-y-4 text-sm">
-              <div className="border-b border-white/5 pb-2">
-                <div className="text-xs text-gray-400">Inicio:</div>
-                <div className="font-mono text-sm">{formatStartDate(startDateObj)}</div>
-              </div>
-
-              <div className="border-b border-white/5 pb-2 grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-xs font-extrabold" style={{ color: 'var(--superciclo-red)' }}>DÍAS SUPER CICLO</div>
-                  <div className="font-extrabold text-3xl" style={{ color: 'var(--superciclo-red)' }}>
-                    {Math.max(0, customCycleDayIndex)}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">(Ciclos completos de {cycleLength.toFixed(1)}h)</div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-xs font-extrabold text-white">TIEMPO TRANSCURRIDO</div>
-                  <div className="font-mono text-xl text-white mt-1">
-                    {formattedTimeElapsed.display}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">(Equivalente en días 24h)</div>
-                </div>
-              </div>
-
-              <div className="border-b border-white/5 pb-2">
-                <div className="text-xs text-gray-400 flex items-center gap-1"><Zap className="w-3 h-3 text-yellow-500"/> Balance Energético (vs 12L/12D):</div>
-                <div className={`font-extrabold text-xl ${balanceColor}`}>
-                  {balanceIcon} {Math.abs(energyBalance).toFixed(2)} hrs
-                </div>
-                <div className="text-xs text-gray-400"> {balanceText} luz acumulado desde el inicio.</div>
-              </div>
-
-              <div className="border-b border-white/5 pb-2">
-                <div className="text-xs text-gray-400">Hora actual:</div>
-                <div className="font-mono text-lg text-white">{now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-              </div>
-
-              <div className="border-b border-white/5 pb-2">
-                <div className="text-xs text-gray-400">Estado del ciclo</div>
-                <div
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-bold transition-all duration-300 ease-out`}
-                  style={{
-                    background: isNowLight
-                      ? "linear-gradient(90deg,#facc15,#f472b6)"
-                      : "var(--accent)",
-                    color: isNowLight ? "#111827" : "#fff",
-                    transform: isNowLight ? "scale(1.05)" : "scale(1)",
-                    boxShadow: isNowLight
-                      ? "0 0 15px rgba(244,114,182,0.4)"
-                      : "0 0 10px rgba(99,102,241,0.3)",
-                  }}
-                >
-                  {isNowLight ? "ON 🔆" : "OFF 🌙"}
-                </div>
-
-              </div>
-
+            {/* Inicio y Tiempo */}
+            <div className="flex justify-between items-start border-b border-white/10 pb-4">
               <div>
-                <div className="text-xs text-gray-400">Próximo evento ({nextChangeEvent.action})</div>
-                <div className="font-semibold text-white text-base">{nextChangeEvent.nextState} — {nextChangeEvent.time} ({nextChangeEvent.date})</div>
-                <div className="text-xs text-gray-400">En {nextChangeEvent.hoursToNext?.toFixed(2) ?? '--'} hrs</div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Inicio</p>
+                <p className="font-mono text-sm text-gray-200 mt-1">{formatStartDate(startDateObj)}</p>
               </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Tiempo transcurrido</p>
+                <p className="font-mono text-base text-white mt-1">
+                  {formattedTimeElapsed.days}d {formattedTimeElapsed.hours}h {formattedTimeElapsed.minutes}m
+                </p>
+                <p className="text-[11px] text-gray-500">(equivalente a días 24h)</p>
+              </div>
+            </div>
+
+            {/* Ciclos y energía */}
+            <div className="grid grid-cols-2 text-sm border-b border-white/10 pb-4">
+              <div className="text-left">
+                <p className="text-xs text-rose-400 font-bold uppercase tracking-wide">Días Super Ciclo</p>
+                <p className="text-4xl font-extrabold text-rose-500 mt-1">{Math.max(0, customCycleDayIndex)}</p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Ciclos de {cycleLength.toFixed(1)}h
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wide">
+                  Balance Energético
+                </p>
+                <p
+                  className={`font-extrabold text-2xl ${
+                    energyBalance > 0
+                      ? "text-emerald-400"
+                      : energyBalance < 0
+                      ? "text-rose-400"
+                      : "text-gray-300"
+                  } mt-1`}
+                >
+                  {energyBalance > 0 ? "▲" : energyBalance < 0 ? "▼" : "•"}{" "}
+                  {Math.abs(energyBalance).toFixed(2)} hrs
+                </p>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  vs ciclo estándar 12L / 12D
+                </p>
+              </div>
+            </div>
+
+            {/* Hora actual */}
+            <div className="border-b border-white/10 pb-4">
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Hora actual</p>
+              <p className="font-mono text-lg text-white mt-1">
+                {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+
+            {/* Estado del ciclo */}
+            {/* Estado del ciclo */}
+                <div className="border-b border-white/10 pb-4 text-center">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">Estado del ciclo</p>
+                  <div
+                    className={`inline-flex items-center gap-2 px-5 py-2 mt-3 rounded-full font-semibold text-sm shadow-md 
+                      ${isNowLight 
+                        ? "bg-yellow-300/90 text-black glow-anim-on" 
+                        : "bg-indigo-600/90 text-white glow-anim-off"}`}
+                  >
+                    {isNowLight ? "ON 🔆" : "OFF 🌙"}
+                  </div>
+                </div>
+
+
+            {/* Próximo evento */}
+            <div className="text-center">
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                Próximo evento ({nextChangeEvent.action})
+              </p>
+              <p className="text-base font-bold text-white">
+                {nextChangeEvent.nextState} — {nextChangeEvent.time} ({nextChangeEvent.date})
+              </p>
+              <p className="text-[12px] text-gray-400 mt-1">
+                En {nextChangeEvent.hoursToNext?.toFixed(2)} hrs
+              </p>
             </div>
           </aside>
 
           {/* Calendar full width below */}
 <section
-  className="lg:col-span-3 mt-4 p-0 rounded-xl border shadow-lg overflow-hidden"
-  style={{ background: "rgba(255,255,255,0.02)" }}
+   id="export-area"
+   className="lg:col-span-3 mt-4 p-0 rounded-xl border shadow-lg overflow-hidden"
+   style={{ background: "rgba(255,255,255,0.02)" }}
+ >
+
+  {/* Contenedor con scroll controlado */}
+<div className="calendar-wrapper calendar" ref={calendarRef}>
+  <table className="min-w-full text-xs">
+    <thead>
+  {/* === Título principal === */}
+  <tr>
+   <th
+  colSpan={26}
+  style={{
+    fontFamily: "'Orbitron', 'Rajdhani', 'Inter', sans-serif",
+    fontWeight: "900",
+    fontSize: "1.75rem", // mantiene el tamaño actual
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    textAlign: "center",
+    background: "transparent",
+    padding: "1rem 0",
+    backgroundImage: "linear-gradient(90deg,#a855f7,#ec4899,#22d3ee)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textShadow: `
+      0 0 10px rgba(168,85,247,0.6),
+      0 0 20px rgba(236,72,153,0.4)
+    `,
+    borderBottom: "2px solid rgba(236,72,153,0.3)",
+  }}
 >
-  <div className="p-4 border-b flex items-center justify-between bg-slate-800/50">
-    <h4 className="font-semibold text-white text-lg">
-      Calendario (Día × Hora)
-    </h4>
+  CALENDARIO SUPERCICLO
+</th>
 
-    <div className="flex items-center gap-3">
-      <div className="text-sm text-gray-400">{durationDays} días</div>
-      <div className="flex gap-2">
-        <button
-          onClick={() => downloadCalendarImage("jpeg")}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-pink-400 text-black rounded-lg shadow-md hover:brightness-95 transition"
+
+
+
+  </tr>
+
+  {/* === Encabezado de Día / Fecha / Horas === */}
+  <tr>
+    <th
+      className="text-center sticky-col font-bold uppercase tracking-wide"
+      style={{
+        background: "rgba(30,30,63,0.95)",
+        zIndex: 51,
+        color: "#a5b4fc",
+        fontSize: "1rem",
+        padding: "0.75rem 0.5rem",
+      }}
+    >
+      Día
+    </th>
+    <th
+      className="text-center sticky-col-2 font-bold uppercase tracking-wide"
+      style={{
+        background: "rgba(30,30,63,0.95)",
+        zIndex: 51,
+        color: "#f9a8d4",
+        fontSize: "1rem",
+        padding: "0.75rem 0.5rem",
+      }}
+    >
+      Fecha
+    </th>
+    {Array.from({ length: 24 }).map((_, h) => (
+      <th
+        key={h}
+        className="text-center text-gray-200 font-semibold"
+        style={{
+          background: "rgba(30,30,63,0.95)",
+          position: "sticky",
+          top: "56px",
+          zIndex: 49,
+          fontSize: "0.9rem",
+          padding: "0.6rem 0.3rem",
+          color: "#cbd5e1",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+        }}
+      >
+        {h}h
+      </th>
+    ))}
+  </tr>
+</thead>
+
+
+    <tbody>
+      {calendar.map((row, d) => (
+        <tr
+          key={d}
+          className={`${
+            d === currentDayIndex24h ? "current-day-row" : ""
+          } hover:bg-white/2 transition`}
         >
-          <Download className="w-4 h-4" /> Descargar JPG
-        </button>
-      </div>
-    </div>
-  </div>
+          {/* Columna fija: Día */}
+          <td
+            className="p-1 sticky-col font-semibold"
+            style={{
+              background:
+                d === currentDayIndex24h
+                  ? "rgba(99,102,241,0.12)"
+                  : "rgba(15,15,35,0.9)",
+            }}
+          >
+            {d + 1}
+          </td>
 
-          {/* Contenedor con scroll controlado */}
-          <div className="calendar-wrapper calendar" ref={calendarRef}>
-            <table className="min-w-full text-xs">
-              <thead>
-                <tr>
-                  <th className="p-2 text-left sticky-col">Día</th>
-                  <th className="p-2 text-left sticky-col-2">Fecha</th>
-                  {Array.from({ length: 24 }).map((_, h) => (
-                    <th key={h} className="p-2 text-center text-sm text-gray-200 w-8">
-                      {h}h
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+          {/* Columna fija: Fecha */}
+          <td
+            className="p-1 sticky-col-2 font-semibold"
+            style={{
+              background:
+                d === currentDayIndex24h
+                  ? "rgba(99,102,241,0.12)"
+                  : "rgba(15,15,35,0.9)",
+            }}
+          >
+            {row[0].dateDisplay}
+          </td>
 
-              <tbody>
-                {calendar.map((row, d) => (
-                  <tr
-                    key={d}
-                    className={`${
-                      d === currentDayIndex24h ? "bg-indigo-900/6" : ""
-                    } hover:bg-white/2 transition`}
-                  >
-                    {/* Columna fija: Día */}
-                    <td
-                      className="p-1 sticky-col font-semibold"
-                      style={{
-                        background:
-                          d === currentDayIndex24h
-                            ? "rgba(99,102,241,0.12)"
-                            : "rgba(15,15,35,0.9)",
-                      }}
-                    >
-                      {d + 1}
-                    </td>
+          {/* Horas */}
+          {row.map((cell, h) => {
+            const isCurrent =
+              d === currentDayIndex24h && h === currentHourIndex;
+            return (
+              <td key={h} className="p-0.5">
+                <div
+                  className={`w-full h-7 rounded-sm flex items-center justify-center text-xs font-mono font-semibold calendar-cell-text ${
+                    isCurrent ? "now-cell" : ""
+                  }`}
+                  style={{
+                    background: cell.isLight
+                      ? "linear-gradient(90deg,#f59e0b,#f472b6)"
+                      : "linear-gradient(90deg,#4338ca,#4338ca99)",
+                    color: "#fff",
+                    transition: "all .12s ease",
+                  }}
+                >
+                  {cell.isLight ? "L" : "D"}
+                </div>
+              </td>
+            );
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
 
-                    {/* Columna fija: Fecha */}
-                    <td
-                      className="p-1 sticky-col-2 font-semibold"
-                      style={{
-                        background:
-                          d === currentDayIndex24h
-                            ? "rgba(99,102,241,0.12)"
-                            : "rgba(15,15,35,0.9)",
-                      }}
-                    >
-                      {row[0].dateDisplay}
-                    </td>
-
-                    {/* Horas */}
-                    {row.map((cell, h) => {
-                      const isCurrent =
-                        d === currentDayIndex24h && h === currentHourIndex;
-                      return (
-                        <td key={h} className="p-0.5">
-                          <div
-                            className={`w-full h-7 rounded-sm flex items-center justify-center text-xs font-mono font-semibold calendar-cell-text ${
-                              isCurrent ? "now-cell" : ""
-                            }`}
-                            style={{
-                              background: cell.isLight
-                                ? "linear-gradient(90deg,#f59e0b,#f472b6)"
-                                : "linear-gradient(90deg,#4338ca,#4338ca99)",
-                              color: "#fff",
-                              transition: "all .12s ease",
-                            }}
-                          >
-                            {cell.isLight ? "L" : "D"}
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
           <div className="p-3 text-xs text-gray-400 border-t">
             Leyenda: L = Luz, D = Oscuridad. Celda actual marcada con contorno rosado
