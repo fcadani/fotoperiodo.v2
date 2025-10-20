@@ -16,6 +16,7 @@ import { Sun, Moon, Download, Upload, RefreshCw, Zap } from "lucide-react";
 import html2canvas from "html2canvas";
 import "./App.css";
 import domtoimage from "dom-to-image-more";
+import html2pdf from "html2pdf.js";
 
 const STORAGE_KEY = "fotoperiodo_settings_v1";
 
@@ -126,44 +127,24 @@ export default function App() {
   // Días "superciclo" (ciclos custom completos)
   const customCycleDayIndex = useMemo(() => Math.floor(hoursSinceStartNow / cycleLength), [hoursSinceStartNow, cycleLength]);
 
- // calendar helpers (24h-based)
-const currentHourIndex = useMemo(() => now.getHours(), [now]);
-const currentDayIndex24h = useMemo(() => {
-  const startOfDayNow = new Date(now);
-  startOfDayNow.setHours(0, 0, 0, 0);
-  const startOfDayStart = new Date(startDateObj);
-  startOfDayStart.setHours(0, 0, 0, 0);
-  const daysSinceStart =
-    (startOfDayNow.getTime() - startOfDayStart.getTime()) /
-    (1000 * 60 * 60 * 24);
-  return Math.floor(daysSinceStart);
+// === calendar helpers (24h-based) ===
+
+// Cuántas horas reales transcurrieron desde el inicio del ciclo
+const currentHoursElapsed = useMemo(() => {
+  return (now.getTime() - startDateObj.getTime()) / (1000 * 60 * 60);
 }, [now, startDateObj]);
 
+// Día actual dentro del ciclo
+const currentDayIndex24h = Math.floor(currentHoursElapsed / 24);
+
+// Hora actual dentro del ciclo (0–23)
+const currentHourIndex = Math.floor(currentHoursElapsed % 24);
+
+// Determina si en esa hora del ciclo hay luz u oscuridad
 function isLightAtAbsoluteHours(hoursSinceStart) {
   const inCycle = ((hoursSinceStart % cycleLength) + cycleLength) % cycleLength;
   return inCycle < Number(hoursLight);
 }
-
-// === Centrar automáticamente la celda actual del calendario al abrir ===
-useEffect(() => {
-  if (!calendarRef.current) return;
-
-  const el = calendarRef.current.querySelector(".now-cell");
-  if (el) {
-    // Evita mover el scroll si el usuario ya desplazó manualmente
-    const alreadyScrolled =
-      calendarRef.current.scrollTop > 50 || calendarRef.current.scrollLeft > 50;
-
-    if (!alreadyScrolled) {
-      el.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
-      });
-    }
-  }
-}, []); // ← Solo se ejecuta una vez al montar
-
 
 
   // energy balance vs 12/12
@@ -204,12 +185,13 @@ useEffect(() => {
       const dateForDay = new Date(startOfDayStart.getTime() + d * MS_PER_DAY);
       const dateDisplay = dateForDay.toLocaleDateString([], { day: '2-digit', month: '2-digit' }).replace(/\//g, '/');
       for (let h = 0; h < 24; h++) {
-        const hoursSinceStart = d * 24 + h - fractionalStartOffset;
+        const hoursSinceStart = d * 24 + h + fractionalStartOffset;
         row.push({
           isLight: Boolean(isLightAtAbsoluteHours(hoursSinceStart)),
           dateDisplay
         });
       }
+
       rows.push(row);
     }
     return rows;
@@ -278,242 +260,123 @@ useEffect(() => {
   // run validation to show errors early
   useEffect(() => { validateInputs(); }, [validateInputs]);
 
-// === Descargar calendario completo centrado sin recortes ni bordes ===
-const downloadCalendarImage = useCallback(async (format = "jpeg") => {
-  if (isExporting) return;
-  setIsExporting(true);
-
+// === Descargar calendario en PDF (sin márgenes, fondo uniforme, 100% visible en mobile y desktop) ===
+const downloadCalendarPDF = useCallback(() => {
   const node = document.querySelector(".calendar-wrapper");
   if (!node) {
     alert("❌ No se encontró el calendario para exportar.");
-    setIsExporting(false);
     return;
   }
 
-  try {
-    console.log("📸 Exportando calendario completo sin recortes...");
+  // Guardar estilos previos
+  const prev = {
+    width: node.style.width,
+    background: node.style.background,
+    padding: node.style.padding,
+    margin: node.style.margin,
+    transform: node.style.transform,
+  };
 
-    // === Clonar el contenedor visible del calendario ===
-        const clone = node.cloneNode(true);
+  // Aplicar fondo y ajustes base
+  Object.assign(node.style, {
+    background: "#111827",
+    margin: "0 auto",
+    padding: "40px 60px",
+    borderRadius: "12px",
+    boxSizing: "border-box",
+    overflow: "visible",
+    transform: "scale(1)",
+    width: "max-content",
+    maxWidth: "none",
+  });
 
-        // === Buscar la tabla interna y forzar versión de escritorio ===
-const table = clone.querySelector("table");
-if (table) {
-  const originalTable = node.querySelector("table");
-  const fullWidth = originalTable ? originalTable.scrollWidth : node.scrollWidth;
+  // === Calcular dimensiones exactas ===
+  const rect = node.getBoundingClientRect();
+  const isMobile = window.innerWidth < 768;
 
-  table.style.overflow = "visible";
-  table.style.width = `${fullWidth}px`;
-  table.style.minWidth = `${fullWidth}px`;
-  table.style.maxWidth = `${fullWidth}px`;
-  table.style.marginLeft = "0";
-  table.style.paddingLeft = "0";
-}
+  // 🔹 En mobile ampliamos un poco el ancho para evitar recorte derecho
+  const realWidth = Math.ceil(rect.width + (isMobile ? 150 : 0));
+  let realHeight = Math.ceil(rect.height);
 
-// === Forzar estilos de escritorio para export, incluso en móvil ===
-clone.style.overflow = "visible";
-clone.style.width = `${node.scrollWidth}px`;
-clone.style.height = `${node.scrollHeight}px`;
-clone.style.minWidth = `${node.scrollWidth}px`;
-clone.style.maxWidth = "none";
-clone.style.boxSizing = "border-box";
-clone.scrollLeft = 0;
-clone.style.backgroundColor = "#0b1020";
-
-// 🔒 Forzar visualización estilo escritorio
-clone.classList.add("export-desktop");
-clone.querySelectorAll("*").forEach((el) => {
-  el.style.overflow = "visible";
-  el.style.maxWidth = "none";
-  el.style.transform = "none";
-  el.style.zoom = "1";
-  el.style.fontSize = "inherit";
-});
-
-        // Forzar visibilidad total (incluyendo hora 0)
-        if (table) {
-          const originalTable = node.querySelector("table");
-          const fullWidth = originalTable ? originalTable.scrollWidth : node.scrollWidth;
-
-          table.style.overflow = "visible";
-          table.style.width = `${fullWidth}px`;
-          table.style.minWidth = `${fullWidth}px`;
-          table.style.maxWidth = `${fullWidth}px`;
-          table.style.marginLeft = "0"; // Asegura que no se recorte la columna 0h
-          table.style.paddingLeft = "0";
-        }
-
-        // === Forzar export idéntico a escritorio (misma proporción en mobile) ===
-          const originalTable = node.querySelector("table");
-          if (originalTable) {
-            const fullWidth = originalTable.scrollWidth; // ancho completo del calendario
-            clone.style.width = `${fullWidth}px`;
-            clone.style.minWidth = `${fullWidth}px`;
-            clone.style.maxWidth = `${fullWidth}px`;
-          }
-
-          // Asegurar escala 1:1 como escritorio
-          clone.style.transform = "scale(1)";
-          clone.style.transformOrigin = "top left";
-          clone.style.zoom = "1";
-
-          // Evitar que el ancho se limite al viewport móvil
-          clone.style.maxWidth = "none";
-          clone.style.overflowX = "visible";
-          clone.style.overflowY = "visible";
-
-
-
-        // Ajustes del clon
-        clone.style.overflow = "visible";
-        clone.style.width = `${node.scrollWidth + 100}px`; // agrega margen de seguridad
-        clone.style.height = `${node.scrollHeight}px`;
-        clone.style.minWidth = `${node.scrollWidth}px`;
-        clone.style.boxSizing = "border-box";
-        clone.scrollLeft = 0;
-        clone.style.backgroundColor = "#0b1020";
-
-
-
-    // Fondo sólido
-    clone.style.background = "#0b1020";
-    clone.style.color = "#fff";
-    clone.style.margin = "0 auto";
-    clone.style.display = "flex";
-    clone.style.alignItems = "center";
-    clone.style.justifyContent = "center";
-
-    // 🔽 LIMPIEZA de bordes blancos y sombras (modo export limpio)
-    clone.classList.add("export-clean");
-    clone.querySelectorAll("*").forEach((el) => {
-      el.style.border = "none";
-      el.style.boxShadow = "none";
-      el.style.outline = "none";
-      el.style.backgroundClip = "border-box";
-      el.style.filter = "none";
-    });
-    // 🔼 FIN BLOQUE LIMPIEZA
-
-    // Inyectar estilos para mantener colores y gradientes
-    try {
-      const style = document.createElement("style");
-      style.textContent = Array.from(document.styleSheets)
-        .map((sheet) => {
-          try {
-            return Array.from(sheet.cssRules).map((r) => r.cssText).join("\n");
-          } catch {
-            return "";
-          }
-        })
-        .join("\n");
-      clone.prepend(style);
-    } catch (e) {}
-
-    // Contenedor seguro fuera de pantalla
-    const safeContainer = document.createElement("div");
-    safeContainer.style.position = "fixed";
-    safeContainer.style.left = "-9999px";
-    safeContainer.style.top = "0";
-    safeContainer.style.background = "#0b1020";
-    safeContainer.style.padding = "50px 0px "; // margen uniforme alrededor
-    safeContainer.style.display = "flex";
-    safeContainer.style.alignItems = "center";
-    safeContainer.style.justifyContent = "center";
-    safeContainer.style.border = "none";
-    safeContainer.style.boxShadow = "none";
-    safeContainer.style.outline = "none";
-
-    // Añadir clon
-    safeContainer.appendChild(clone);
-    document.body.appendChild(safeContainer);
-
-    // Esperar render
-    await new Promise((r) => setTimeout(r, 300));
-
-    // 🔧 Corregir superposición y alineación de columnas sticky
-clone.querySelectorAll(".sticky-col, .sticky-col-2, thead th").forEach((el) => {
-  el.style.position = "static"; // elimina completamente el sticky
-  el.style.left = "auto";
-  el.style.top = "auto";
-  el.style.zIndex = "auto";
-  el.style.background = "#0b1020"; // fondo uniforme con el resto
-  el.style.boxShadow = "none";
-  el.style.transform = "none";
-});
-
-    // === FIX de nitidez para el título durante export ===
-const title = clone.querySelector(".calendar-title");
-if (title) {
-  // 🔹 Versión export más nítida, con color sólido y contorno brillante
-  title.style.background = "none";
-  title.style.webkitBackgroundClip = "unset";
-  title.style.webkitTextFillColor = "#fff";
-  title.style.color = "#fff";
-  title.style.textShadow = `
-    0 0 8px rgba(255,255,255,0.9),
-    0 0 14px rgba(168,85,247,0.8),
-    0 0 25px rgba(236,72,153,0.6)
-  `;
-  title.style.filter = "none";
-  title.style.opacity = "1";
-  title.style.fontSmoothing = "antialiased";
-}
-
-
-
-// Captura completa sin cortar filas ni bordes
-const scale = 3; // Aumenta la resolución (2 = HD, 3 = FullHD, 4 = 4K)
-
-const blob =
-  format === "jpeg"
-    ? await domtoimage.toJpeg(safeContainer, {
-        quality: 1,
-        bgcolor: "#0b1020",
-        style: {
-          backgroundColor: "#0b1020",
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-          width: `${safeContainer.offsetWidth}px`,
-          height: `${safeContainer.offsetHeight}px`,
-        },
-        width: safeContainer.offsetWidth * scale,
-        height: safeContainer.offsetHeight * scale,
-      })
-    : await domtoimage.toPng(safeContainer, {
-        quality: 1,
-        bgcolor: "#0b1020",
-        style: {
-          backgroundColor: "#0b1020",
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
-          width: `${safeContainer.offsetWidth}px`,
-          height: `${safeContainer.offsetHeight}px`,
-        },
-        width: safeContainer.offsetWidth * scale,
-        height: safeContainer.offsetHeight * scale,
-      });
-
-
-
-
-    // Limpieza
-    document.body.removeChild(safeContainer);
-    clone.classList.remove("export-clean");
-
-    // Descargar
-    const a = document.createElement("a");
-    a.href = blob;
-    a.download = `fotoperiodo_calendar.${format}`;
-    a.click();
-
-    console.log("✅ Exportación completa y centrada sin recortes ni contornos blancos.");
-  } catch (err) {
-    console.error("❌ Error al exportar calendario:", err);
-    alert("No se pudo exportar correctamente la imagen.");
-  } finally {
-    setIsExporting(false);
+  // 🔹 En mobile ajustamos el alto para eliminar el espacio blanco final
+  if (isMobile) {
+    realHeight = realHeight - 20;
   }
-}, [isExporting]);
+
+  // Conversión px → mm
+  const wMM = realWidth * 0.2646;
+  const hMM = realHeight * 0.2646;
+
+  // === Configuración PDF ===
+  const opt = {
+    margin: [0, 0, 0, 0],
+    filename: "calendario_superciclo.pdf",
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: "#111827",
+      scrollX: 0,
+      scrollY: 0,
+      width: realWidth,
+      height: realHeight,
+      windowWidth: realWidth,
+      windowHeight: realHeight,
+      x: 0,
+      y: 0,
+      letterRendering: true,
+      dpi: 300,
+      logging: false,
+    },
+    jsPDF: {
+      unit: "mm",
+      format: [wMM, hMM],
+      orientation: wMM > hMM ? "landscape" : "portrait",
+      compress: true,
+      precision: 16,
+    },
+  };
+
+  // === Generar PDF ===
+  setTimeout(() => {
+    html2pdf()
+      .set(opt)
+      .from(node)
+      .save()
+      .then(() => {
+        Object.assign(node.style, prev);
+      })
+      .catch((err) => {
+        console.error("❌ Error al generar PDF:", err);
+        alert("Error al generar el PDF.");
+        Object.assign(node.style, prev);
+      });
+  }, 400);
+}, []);
+
+
+
+
+// === Controlador visual para exportar PDF con estado y protección de doble clic ===
+const handleDownloadPDF = async () => {
+  if (isExporting) return; // Previene doble clic
+  setIsExporting(true);
+
+  try {
+    const isMobile = window.innerWidth <= 768;
+    console.log(isMobile ? "📱 Exportando desde mobile..." : "💻 Exportando desde escritorio...");
+    
+    await downloadCalendarPDF(); // 🔹 ejecuta tu función original
+  } catch (error) {
+    console.error("❌ Error durante exportación:", error);
+    alert("Ocurrió un error al generar el PDF.");
+  } finally {
+    // 🔹 Pequeño efecto visual al terminar
+    setTimeout(() => setIsExporting(false), 1000);
+  }
+};
+
+
 
 
 
@@ -620,18 +483,24 @@ const blob =
       Exportar JSON
     </button>
 
-    <button
-      onClick={() => downloadCalendarImage("jpeg")}
-      disabled={isExporting}
-      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg shadow-md transition ${
-        isExporting
-          ? "bg-gray-500 text-gray-300 cursor-wait"
-          : "bg-pink-400 text-black hover:brightness-95"
-      }`}
-    >
-      <Download className="w-4 h-4" />
-      {isExporting ? "Exportando..." : "Descargar JPG"}
-    </button>
+
+  <button
+  onClick={handleDownloadPDF}
+  disabled={isExporting}
+  className={`transition-all duration-300 text-white font-bold py-3 px-6 rounded-xl shadow-md 
+    ${isExporting
+      ? "bg-gray-600 cursor-not-allowed opacity-70"
+      : "bg-pink-500 hover:bg-pink-600 active:bg-pink-700"
+    }`}
+>
+  {isExporting ? "📄 Generando PDF…" : "⬇️ Descargar PDF"}
+</button>
+
+
+
+
+
+
 
     <button
       onClick={resetDefaults}
@@ -756,17 +625,13 @@ const blob =
 <div className="calendar-wrapper calendar" ref={calendarRef}>
   <table className="min-w-full text-xs">
     <thead>
-  {/* === Título principal === */}
-  <tr>
-   <th colSpan={26} className="calendar-title">
-  CALENDARIO SUPERCICLO
-</th>
+      {/* === Título principal === */}
+      <tr>
+         <th colSpan={26} className="calendar-title" data-text="CALENDARIO SUPERCICLO">
+            CALENDARIO SUPERCICLO
+          </th>
 
-
-
-
-
-  </tr>
+      </tr>
 
   {/* === Encabezado de Día / Fecha / Horas === */}
   <tr>
@@ -822,57 +687,60 @@ const blob =
           key={d}
           className={`${
             d === currentDayIndex24h ? "current-day-row" : ""
-          } hover:bg-white/2 transition`}
+          } transition-all duration-500`}
         >
-          {/* Columna fija: Día */}
-          <td
-            className="p-1 sticky-col font-semibold"
-            style={{
-              background:
-                d === currentDayIndex24h
-                  ? "rgba(99,102,241,0.12)"
-                  : "rgba(15,15,35,0.9)",
-            }}
-          >
+        {/* Columna fija: Día */}
+          <td className="p-1 sticky-col font-semibold">
             {d + 1}
           </td>
 
           {/* Columna fija: Fecha */}
-          <td
-            className="p-1 sticky-col-2 font-semibold"
-            style={{
-              background:
-                d === currentDayIndex24h
-                  ? "rgba(99,102,241,0.12)"
-                  : "rgba(15,15,35,0.9)",
-            }}
-          >
+          <td className="p-1 sticky-col-2 font-semibold">
             {row[0].dateDisplay}
           </td>
 
-          {/* Horas */}
-          {row.map((cell, h) => {
-            const isCurrent =
-              d === currentDayIndex24h && h === currentHourIndex;
-            return (
-              <td key={h} className="p-0.5">
-                <div
-                  className={`w-full h-7 rounded-sm flex items-center justify-center text-xs font-mono font-semibold calendar-cell-text ${
-                    isCurrent ? "now-cell" : ""
-                  }`}
-                  style={{
-                    background: cell.isLight
-                      ? "linear-gradient(90deg,#f59e0b,#f472b6)"
-                      : "linear-gradient(90deg,#4338ca,#4338ca99)",
-                    color: "#fff",
-                    transition: "all .12s ease",
-                  }}
-                >
-                  {cell.isLight ? "L" : "D"}
-                </div>
-              </td>
-            );
-          })}
+            {/* Horas */}
+            {row.map((cell, h) => {
+  // 🔹 Hora actual del sistema
+  const currentDate = new Date();
+
+  // 🔹 Calcular día actual respecto al inicio del calendario (00:00 del día inicial)
+  const startOfDayStart = new Date(startDateObj);
+  startOfDayStart.setHours(0, 0, 0, 0);
+  const diffHours = (currentDate - startOfDayStart) / (1000 * 60 * 60);
+  const currentDayCycle = Math.floor(diffHours / 24);
+
+  // 🔹 Hora actual del sistema (0–23)
+  const currentHourCycle = currentDate.getHours();
+
+  // 🔹 Determina si esta celda es la actual (día y hora reales)
+  const isCurrent = d === currentDayCycle && h === currentHourCycle;
+
+  return (
+    <td key={h} className="p-0.5">
+      <div
+        className={`w-full h-7 rounded-sm flex items-center justify-center text-xs font-mono font-semibold calendar-cell-text ${
+          isCurrent ? "now-cell-active" : ""
+        }`}
+        style={{
+          background: cell.isLight
+            ? "linear-gradient(90deg,#f59e0b,#f472b6)"
+            : "linear-gradient(90deg,#4338ca,#4338ca99)",
+          color: "#fff",
+          transition: "all .12s ease",
+        }}
+      >
+        {cell.isLight ? "L" : "D"}
+      </div>
+    </td>
+  );
+})}
+
+
+
+
+
+
         </tr>
       ))}
     </tbody>
@@ -882,7 +750,7 @@ const blob =
 
           <div className="p-3 text-xs text-gray-400 border-t">
             Leyenda: L = Luz, D = Oscuridad. Celda actual marcada con contorno rosado
-            brillante. Podés descargar el calendario como imagen (PNG/JPG) para usarlo
+            brillante. Podés descargar el calendario como imagen (JPG) para usarlo
             de wallpaper.
           </div>
         </section>

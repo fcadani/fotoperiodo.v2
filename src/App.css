@@ -86,19 +86,7 @@ body, .app-root {
   vertical-align: middle;
 }
 
-/* === ANCHOS DE COLUMNAS === */
-.calendar td.sticky-col,
-.calendar th.sticky-col {
-  width: 2rem !important;
-  min-width: 2rem !important;
-  text-align: center;
-}
-.calendar td.sticky-col-2,
-.calendar th.sticky-col-2 {
-  width: 2.8rem !important;
-  min-width: 2.8rem !important;
-  text-align: center;
-}
+
 
 /* === CELDAS DE HORAS === */
 .calendar td div {
@@ -126,67 +114,158 @@ body, .app-root {
   background: linear-gradient(135deg, #2b2e83 0%, #1a1c4b 100%);
 }
 
-/* === CABECERA FIJA === */
+/* === CABECERA FIJA (fila de horas y encabezados unificados) === */
 .calendar thead th {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(17, 24, 39, 0.98);
-  backdrop-filter: blur(4px);
   font-weight: 700;
   letter-spacing: 0.5px;
-  padding: 0.25rem 0.15rem !important;
   text-align: center !important;
-}
 
-/* === COLUMNAS FIJAS === */
-.sticky-col {
-  position: sticky;
-  left: 0;
+  /* 💜 Unificación visual */
+  height: 2.2rem !important;
+  line-height: 2.2rem !important;
+  font-size: 0.8rem !important;
+  padding: 0.2rem 0.15rem !important;
+
+  /* 🎨 Color satinado translúcido (violeta suave) */
   background: rgba(17, 24, 39, 0.98);
-  z-index: 45;
+  backdrop-filter: blur(4px);
+  color: #f3f4f6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-.sticky-col-2 {
-  position: sticky;
-  left: 2rem; /* coincide con col Día */
+
+/* === TÍTULO DEL CALENDARIO — TEXTO SÓLIDO con degradado tipo neón (unificado) === */
+.calendar thead tr:first-child th.calendar-title,
+.calendar-title {
+  position: relative;
+  display: table-cell !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 4.6rem !important; /* 🔹 antes 5.2rem */
+  padding: 1.4rem 0 !important;  /* 🔹 menos padding vertical */
+  line-height: 1.05 !important;  /* 🔹 más compacto */
+
+  /* Tipografía */
+  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 2.9rem !important; /* 🔹 reducido desde 3.6rem */
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  /* Texto sólido base */
+  color: #b094c7 !important; /* violeta suave sólido */
+
+  /* 💫 Brillo y profundidad (mantiene el efecto tipo neón) */
+  text-shadow:
+    0 0 6px rgba(236,72,153,0.35),
+    0 0 12px rgba(168,85,247,0.25),
+    0 0 22px rgba(34,211,238,0.2);
+
+  /* Fondo de fila */
+   background-color: #111827 !important;
+  backdrop-filter: none !important;
+  overflow: hidden;
+}
+
+
+
+
+
+
+
+/* === COLUMNAS FIJAS (DÍA / FECHA) === */
+.calendar td.sticky-col,
+.calendar th.sticky-col,
+.calendar td.sticky-col-2,
+.calendar th.sticky-col-2 {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.8rem !important;
+  height: 2.2rem !important;
+  line-height: 2.2rem !important;
+  color: #f3f4f6 !important;
+
+  /* 💜 Mismo acabado que la fila de horas */
   background: rgba(17, 24, 39, 0.98);
-  z-index: 40;
+  backdrop-filter: blur(4px);
+
+  /* 🔹 Bordes suaves */
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* === CELDA ACTUAL === */
-.now-cell div {
-  border: 2px solid var(--highlight-now) !important;
-  box-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
-  transform: scale(1.03);
-  z-index: 10;
+/* ✨ Día actual con animación suave (solo columnas fijas) */
+.calendar td.current-day,
+.calendar th.current-day {
+  background: rgba(99, 102, 241, 0.18) !important;
+  animation: pulseDay 3s ease-in-out infinite alternate;
+  backdrop-filter: blur(6px);
 }
 
-/* === EXPORTACIÓN (sin bordes blancos) === */
-.exporting .calendar-wrapper {
-  background: var(--bg-1);
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-}
-.exporting .calendar table {
-  background: var(--bg-1);
-  margin: 0;
-  padding: 0;
-}
-.exporting .calendar td div {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* === MÓVIL (VERSIÓN COMPACTA) === */
-@media (max-width: 768px) {
-  .calendar-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    padding: 0;
+@keyframes pulseDay {
+  0% {
+    background: rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 4px rgba(99, 102, 241, 0.2);
   }
+  100% {
+    background: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.35);
+  }
+}
+
+/* === 💜 FILA ACTUAL COMPLETA (efecto tipo botón OFF, solo horas) === */
+.current-day-row td:not(.sticky-col):not(.sticky-col-2) {
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.22), rgba(79, 70, 229, 0.28));
+  box-shadow:
+    0 0 12px rgba(99, 102, 241, 0.4),
+    0 0 24px rgba(139, 92, 246, 0.3),
+    inset 0 0 6px rgba(139, 92, 246, 0.25);
+  animation: pulseRow 1s ease-in-out infinite alternate;
+  transition: all 0.3s ease-in-out;
+}
+
+/* ✨ Animación respiratoria */
+@keyframes pulseRow {
+  0% {
+    box-shadow:
+      0 0 8px rgba(99, 102, 241, 0.3),
+      0 0 16px rgba(139, 92, 246, 0.25),
+      inset 0 0 4px rgba(139, 92, 246, 0.2);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow:
+      0 0 18px rgba(99, 102, 241, 0.5),
+      0 0 32px rgba(139, 92, 246, 0.35),
+      inset 0 0 8px rgba(139, 92, 246, 0.3);
+    transform: scale(1.01);
+  }
+}
+
+
+
+
+
+
+
+/* Tamaños específicos */
+.calendar td.sticky-col,
+.calendar th.sticky-col {
+  width: 2rem !important;
+  min-width: 2rem !important;
+}
+
+.calendar td.sticky-col-2,
+.calendar th.sticky-col-2 {
+  width: 2.8rem !important;
+  min-width: 2.8rem !important;
+}
+
 
   .calendar thead th {
     font-size: 0.65rem !important;
@@ -227,22 +306,14 @@ body, .app-root {
     min-width: 26px;
   }
   
-}
+
 
 /* === FONDO GLOBAL === */
 html, body {
   background-color: var(--bg-1) !important;
   color: var(--text-primary) !important;
 }
-/* === CORRECCIÓN EXPORTACIÓN JPG === */
 
-/* Forzar fondo igual al del sitio */
-.export-clean,
-.export-clean * {
-  background-color: #0b1020 !important;  /* mismo que --bg-1 */
-  background: #0b1020 !important;
-  color: #f3f4f6 !important;
-}
 
 /* Evitar que las columnas sticky se superpongan */
 .calendar th,
@@ -250,49 +321,7 @@ html, body {
   position: static !important;
 }
 
-/* Quitar bordes extra al exportar */
-.export-clean {
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
-}
 
-/* Centrar y ajustar la tabla para que se exporte completa */
-.export-clean table {
-  width: auto !important;
-  margin: 0 auto !important;
-  border-collapse: collapse !important;
-  background-color: #0b1020 !important;
-}
-.section-title {
-  text-align: center;
-  font-weight: 800;
-  font-size: 1.1rem;
-  letter-spacing: 0.06em;
-  color: var(--accent-700, #a5b4fc);
-  text-transform: uppercase;
-  position: relative;
-  margin: 0.75rem auto 1rem;
-}
-
-.section-title::after {
-  content: "";
-  display: block;
-  width: 100px;
-  height: 3px;
-  margin: 0.4rem auto 0;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #6366f1, #ec4899, #6366f1);
-  background-size: 200% 100%;
-  animation: gradient-move 3s linear infinite;
-  opacity: 0.9;
-}
-
-@keyframes gradient-move {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
 /* === Estilo general de las tarjetas principales === */
 section, aside {
   display: flex;
@@ -311,37 +340,9 @@ section:hover, aside:hover {
   transform: translateY(-2px);
 }
 
-/* === Títulos principales estilo futurista === */
-.section-title {
-  text-align: center;
-  font-weight: 900;
-  font-size: 1.25rem;
-  letter-spacing: 0.08em;
-  color: #b5b9ff;
-  text-transform: uppercase;
-  position: relative;
-  margin: 1rem auto 1.2rem;
-  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
-  text-shadow: 0 0 6px rgba(120, 100, 255, 0.8), 0 0 15px rgba(236, 72, 153, 0.4);
-}
 
-.section-title::after {
-  content: "";
-  display: block;
-  width: 120px;
-  height: 3px;
-  margin: 0.5rem auto 0;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #6366f1, #ec4899, #8b5cf6);
-  background-size: 200% 100%;
-  animation: gradient-move 3s linear infinite;
-  opacity: 0.9;
-}
 
-@keyframes gradient-move {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
+
 
 /* === Estilo especial para el título principal SUPERCICLO === */
 h1 {
@@ -420,55 +421,6 @@ button:hover, label:hover {
 .glow-anim-off {
   animation: glow-pulse-off 2.4s infinite ease-in-out;
 }
-/* === MOBILE OPTIMIZADO === */
-@media (max-width: 768px) {
-  /* Alinear inputs en columna homogénea */
-  #export-area input {
-    width: 100% !important;
-    text-align: center;
-  }
-
-  #export-area .grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  #export-area label {
-    text-align: center;
-    font-size: 0.8rem;
-  }
-
-  /* Ajuste de calendario */
-  .calendar-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-left: 1rem; /* evita que se corte Día */
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-
-  .calendar table {
-    min-width: max-content;
-  }
-
-  /* Que las columnas fijas no tapen */
-  .sticky-col,
-  .sticky-col-2 {
-    background: rgba(15, 20, 40, 0.95);
-    backdrop-filter: blur(3px);
-  }
-}
-
-/* === MARCADOR LLAMATIVO DE CELDA ACTUAL === */
-.now-cell div {
-  border: 2px solid #f472b6 !important;
-  box-shadow:
-    0 0 12px rgba(236, 72, 153, 0.8),
-    0 0 24px rgba(147, 51, 234, 0.7),
-    inset 0 0 10px rgba(255, 255, 255, 0.2);
-  animation: pulse-now 2s infinite ease-in-out;
-}
 
 @keyframes pulse-now {
   0%, 100% {
@@ -529,11 +481,6 @@ button:hover, label:hover {
   color: white;
 }
 
-/* Descargar JPG (rosado) */
-#export-area button.bg-pink-400 {
-  background: linear-gradient(90deg, #ec4899, #f472b6);
-  color: #111;
-}
 
 /* Reset (gris con degradado oscuro) */
 #export-area button.bg-gray-600 {
@@ -541,19 +488,6 @@ button:hover, label:hover {
   color: #f3f4f6;
 }
 
-/* Ajuste responsive */
-@media (max-width: 768px) {
-  #export-area .flex.flex-wrap.gap-2.mt-2 {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  #export-area button,
-  #export-area label {
-    font-size: 0.85rem;
-    padding: 0.75rem 0.5rem;
-  }
-}
 /* Celdas */
 .calendar-table td,
 .calendar-table th {
@@ -594,20 +528,6 @@ button:hover, label:hover {
   z-index: 9;
 }
 
-/* En móviles, da más espacio a la izquierda */
-@media (max-width: 768px) {
-  .calendar-wrapper {
-    padding-left: 1rem !important;
-    padding-right: 0.5rem !important;
-  }
-
-  .calendar td div {
-    width: 1.1rem !important;
-    height: 1.1rem !important;
-    font-size: 0.55rem !important;
-  }
-}
-
 /* === CONTENEDOR CALENDARIO === */
 .calendar-container {
   display: flex;
@@ -620,219 +540,10 @@ button:hover, label:hover {
   border-radius: 1rem;
 }
 
-
-/* === CELDA ACTUAL DESTACADA === */
-.now-cell div {
-  border: 2px solid #f472b6 !important;
-  box-shadow:
-    0 0 12px rgba(236, 72, 153, 0.9),
-    0 0 24px rgba(99, 102, 241, 0.7),
-    inset 0 0 10px rgba(255, 255, 255, 0.3);
-  animation: glowPulseNow 1.8s ease-in-out infinite;
-}
-
-@keyframes glowPulseNow {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow:
-      0 0 10px rgba(236, 72, 153, 0.8),
-      0 0 25px rgba(99, 102, 241, 0.6);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow:
-      0 0 18px rgba(236, 72, 153, 1),
-      0 0 35px rgba(147, 51, 234, 0.8);
-  }
-}
-/* === OPTIMIZACIÓN DE ESPACIADO ENTRE COLUMNAS === */
-.calendar table {
-  border-collapse: collapse !important;
-  border-spacing: 0 !important;
-}
-
-.calendar td,
-.calendar th {
-  padding: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-}
-
-.calendar td div {
-  margin: 0 !important;
-  border: none !important;
-  border-radius: 2px !important;
-}
-
-/* === FILA ACTUAL DESTACADA === */
-.current-day-row td div {
-  position: relative;
-  background: linear-gradient(90deg, #4338ca 0%, #312e81 100%);
-  box-shadow: inset 0 0 8px rgba(147, 51, 234, 0.3);
-}
-
-.current-day-row td[data-type="L"] div {
-  background: linear-gradient(90deg, #f59e0b, #f472b6);
-}
-
-.current-day-row td[data-type="D"] div {
-  background: linear-gradient(90deg, #312e81, #1e1b4b);
-}
-
-/* Contorno brillante para toda la fila actual */
-.current-day-row td:first-child div::before,
-.current-day-row td:last-child div::after {
-  content: "";
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  top: 0;
-  bottom: 0;
-  border: 1px solid rgba(236, 72, 153, 0.6);
-  border-radius: 4px;
-  box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
-  z-index: 5;
-}
-
-/* === CELDA ACTUAL (hora exacta) === */
-.now-cell div {
-  border: 2px solid #f472b6 !important;
-  box-shadow:
-    0 0 15px rgba(236, 72, 153, 0.8),
-    0 0 35px rgba(147, 51, 234, 0.6),
-    inset 0 0 10px rgba(255, 255, 255, 0.3);
-  transform: scale(1.06);
-  z-index: 10;
-  animation: glowPulseNow 2s ease-in-out infinite;
-}
-
-@keyframes glowPulseNow {
-  0%, 100% {
-    transform: scale(1.05);
-    box-shadow:
-      0 0 10px rgba(236, 72, 153, 0.7),
-      0 0 25px rgba(147, 51, 234, 0.5);
-  }
-  50% {
-    transform: scale(1.08);
-    box-shadow:
-      0 0 20px rgba(236, 72, 153, 0.9),
-      0 0 40px rgba(147, 51, 234, 0.7);
-  }
-}
-
-/* === MOBILE: SIN ESPACIADOS Y AJUSTADO === */
-@media (max-width: 768px) {
-  .calendar td div {
-    width: 1rem !important;
-    height: 1rem !important;
-    font-size: 0.55rem !important;
-    border-radius: 1px !important;
-  }
-
-  .calendar th {
-    font-size: 0.6rem !important;
-  }
-}
 /* === REFINAMIENTO VISUAL DE CELDAS === */
 .calendar td div {
   width: 1.8rem !important;
   height: 1.8rem !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 4px !important;
-  border: none !important;
-  transition: all 0.15s ease-in-out;
-}
-
-/* === REDUCCIÓN DE ESPACIOS OSCUROS ENTRE CELDAS === */
-.calendar td,
-.calendar th {
-  padding: 0 !important;
-  margin: 0 !important;
-  border-collapse: collapse !important;
-}
-.calendar table {
-  border-spacing: 0 !important;
-  border-collapse: collapse !important;
-}
-
-/* === FILA ACTUAL — RESALTADO MÁS FUERTE === */
-.current-day-row td div {
-  position: relative;
-  box-shadow: inset 0 0 30px rgba(230, 77, 6, 0.25), 0 0 30px rgba(230, 153, 11, 0.2);
-  filter: brightness(.95);
-}
-
-.current-day-row td:first-child div::before,
-.current-day-row td:last-child div::after {
-  content: "";
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  top: -2px;
-  bottom: -2px;
-  border-radius: 6px;
-  border: 4px solid rgba(236, 72, 153, 0.6);
-  box-shadow: 0 0 50px rgba(236, 72, 153, 0.6), 0 0 50px rgba(147, 51, 234, 0.4);
-  pointer-events: none;
-}
-
-/* === CELDA ACTUAL — EFECTO NEÓN MÁS FUERTE === */
-.now-cell div {
-  border: 4px solid #f472b6 !important;
-  box-shadow:
-    0 0 20px rgba(236, 72, 153, 0.9),
-    0 0 40px rgba(147, 51, 234, 0.8),
-    0 0 60px rgba(147, 51, 234, 0.6),
-    inset 0 0 10px rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-  z-index: 15;
-  animation: neonPulse 1.6s ease-in-out infinite;
-}
-
-@keyframes neonPulse {
-  0%, 100% {
-    transform: scale(1.08);
-    box-shadow:
-      0 0 25px rgba(236, 72, 153, 0.8),
-      0 0 50px rgba(147, 51, 234, 0.7);
-  }
-  50% {
-    transform: scale(1.14);
-    box-shadow:
-      0 0 35px rgba(236, 72, 153, 1),
-      0 0 70px rgba(147, 51, 234, 0.9);
-  }
-}
-
-/* === MOBILE OPTIMIZADO === */
-@media (max-width: 768px) {
-  .calendar td div {
-    width: 1.2rem !important;
-    height: 1.2rem !important;
-    border-radius: 3px !important;
-  }
-
-  .calendar thead th {
-    font-size: 0.65rem !important;
-    padding: 0.15rem !important;
-  }
-
-  .current-day-row td:first-child div::before,
-  .current-day-row td:last-child div::after {
-    border: 1.5px solid rgba(236, 72, 153, 0.6);
-  }
-
-  .now-cell div {
-    border-width: 2px !important;
-    transform: scale(1.08);
-  }
-}
-/* === ENSANCHAR CUADROS DE COLOR Y ELIMINAR ESPACIOS VERTICALES === */
-.calendar td div {
-  width: 2rem !important;       /* Aumenta el ancho de cada celda */
-  height: 1.6rem !important;    /* Mantiene altura proporcional */
   margin: 0 !important;
   padding: 0 !important;
   border-radius: 4px !important;
@@ -856,77 +567,7 @@ button:hover, label:hover {
   margin: 0 auto;
 }
 
-/* === VERSIÓN MOBILE: MISMA PROPORCIÓN, LIGERAMENTE MÁS COMPACTA === */
-@media (max-width: 768px) {
-  .calendar td div {
-    width: 1.4rem !important;   /* Ancho reducido proporcional */
-    height: 1.2rem !important;
-    border-radius: 3px !important;
-  }
 
-  .calendar thead th {
-    font-size: 0.65rem !important;
-    padding: 0.1rem !important;
-  }
-}
-/* === EXPORTACIÓN LIMPIA (elimina bordes blancos) === */
-.export-clean,
-.export-clean * {
-  background-color: #0b1020 !important;
-  color: #f3f4f6 !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  filter: none !important;
-}
-
-/* Asegura que no haya halos */
-.export-clean table,
-.export-clean td,
-.export-clean th {
-  border: none !important;
-  background: #0b1020 !important;
-}
-
-
-/* === Forzar estilo escritorio en exportaciones (evita media queries móviles) === */
-.export-desktop .calendar-wrapper {
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-  padding: 0 !important;
-}
-
-.export-desktop table {
-  width: auto !important;
-  min-width: auto !important;
-  max-width: none !important;
-}
-
-.export-desktop td,
-.export-desktop th {
-  font-size: 0.75rem !important; /* igual al escritorio */
-  padding: 0 !important;
-}
-/* === Forzar modo escritorio en export (para que móvil use las mismas proporciones === */
-.export-desktop,
-.export-desktop * {
-  font-size: 0.75rem !important;
-  transform: none !important;
-  zoom: 1 !important;
-  width: auto !important;
-  height: auto !important;
-  border-radius: 4px !important;
-  letter-spacing: normal !important;
-}
-
-/* Evita que se apliquen media queries móviles dentro del clon */
-.export-desktop .calendar td div,
-.export-desktop .calendar thead th {
-  width: 2rem !important;
-  height: 1.6rem !important;
-  font-size: 0.75rem !important;
-  padding: 0 !important;
-}
 
 /* ✨ Animación leve de brillo (opcional) */
 @keyframes glowPulse {
@@ -947,100 +588,123 @@ button:hover, label:hover {
   }
 }
 
-/* Ajuste responsivo para MOBILE */
+
+/* === Ajusta colores de celdas según tipo === */
+.current-day-row td[data-type="L"] div {
+  background: linear-gradient(90deg, #f59e0b, #f472b6);
+}
+.current-day-row td[data-type="D"] div {
+  background: linear-gradient(90deg, #312e81, #1e1b4b);
+}
+
+/* === FILA ACTUAL (día actual) === */
+.current-day-row td div {
+  box-shadow: none !important;
+  filter: brightness(1.02);
+  transition: all 0.25s ease-in-out;
+  background-blend-mode: normal;
+}
+
+/* === CELDA ACTUAL (hora real) — versión intensificada === */
+.now-cell-active {
+  outline: 2px solid #ff2d55 !important; /* 🔹 Borde rosado intenso */
+  outline-offset: -1px;
+  border-radius: 5px;
+  transform: scale(1.12);
+  z-index: 60;
+  background: linear-gradient(90deg, #ff80b5, #ff2d55) !important; /* 🔹 Overlay rosado brillante */
+  color: #fff !important;
+  box-shadow:
+    0 0 18px rgba(255, 105, 180, 1),
+    0 0 38px rgba(236, 72, 153, 0.95),
+    0 0 60px rgba(147, 51, 234, 0.85),
+    inset 0 0 12px rgba(255, 255, 255, 0.6);
+  animation: glowPulseNowStrong 1.8s ease-in-out infinite;
+  transition: all 0.25s ease-in-out;
+}
+
+/* === Animación de pulso fuerte === */
+@keyframes glowPulseNowStrong {
+  0%, 100% {
+    transform: scale(1.1);
+    box-shadow:
+      0 0 25px rgba(255, 105, 180, 1),
+      0 0 50px rgba(236, 72, 153, 0.9),
+      0 0 80px rgba(147, 51, 234, 0.8),
+      inset 0 0 10px rgba(255, 255, 255, 0.7);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow:
+      0 0 35px rgba(255, 182, 193, 1),
+      0 0 70px rgba(236, 72, 153, 1),
+      0 0 110px rgba(147, 51, 234, 0.9),
+      inset 0 0 16px rgba(255, 255, 255, 0.9);
+  }
+}
+
+
+
+
+/* === MOBILE — Mantiene diseño idéntico al escritorio === */
 @media (max-width: 768px) {
-  .calendar-title {
-    font-size: 2.4rem; /* agranda un poco en mobile */
-    letter-spacing: 0.14em;
-    padding: 1.6rem 0;
+
+  /* Contenedor principal sin exceso de padding */
+  .calendar-wrapper {
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    transform: scale(0.92); /* 🔹 compacta visualmente sin distorsionar */
+    transform-origin: top center;
+  }
+
+  /* Mantener proporciones y colores de escritorio */
+  .calendar td div {
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+    font-size: 0.7rem !important;
+    border-radius: 4px !important;
+  }
+
+  /* Encabezados iguales que escritorio */
+  .calendar thead th {
+    font-size: 0.75rem !important;
+    padding: 0.2rem 0.15rem !important;
+    height: 2.2rem !important;
+    line-height: 2.2rem !important;
+  }
+
+  /* Corrige las columnas fijas */
+  .sticky-col {
+    left: 0 !important;
+    width: 2rem !important;
+  }
+
+  .sticky-col-2 {
+    left: 2rem !important;
+    width: 2.8rem !important;
+  }
+
+  /* Ajuste general del contenedor */
+  .calendar-container {
+    padding: 0.25rem !important;
+    margin: 0 auto !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Celda activa — mismo tamaño que escritorio */
+  .now-cell-active {
+    transform: scale(1.05);
+    box-shadow:
+      0 0 12px rgba(255, 105, 180, 0.7),
+      0 0 26px rgba(147, 51, 234, 0.6);
   }
 }
 
-/* Ajuste responsivo */
-@media (max-width: 768px) {
-  .calendar-title {
-    font-size: 2.4rem;
-    letter-spacing: 0.14em;
-    padding: 1.5rem 0;
-  }
+
+button[disabled].cursor-not-allowed {
+  animation: pulse-glow 1.5s infinite ease-in-out;
 }
-
-/* === TÍTULO PRINCIPAL DEL CALENDARIO — NÍTIDO Y COLORIDO === */
-.calendar-title {
-  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
-  font-weight: 900;
-  font-size: 2.2rem;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 1.2rem 0;
-  margin: 0 auto;
-  color: #fff;
-
-  /* Resplandor colorido tipo neón */
-  text-shadow:
-    0 0 6px rgba(139, 92, 246, 0.7),   /* violeta */
-    0 0 12px rgba(236, 72, 153, 0.6),  /* rosado */
-    0 0 22px rgba(34, 211, 238, 0.5);  /* celeste */
-
-  /* Efecto suave de brillo */
-  animation: titleGlow 4s ease-in-out infinite alternate;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-@keyframes titleGlow {
-  0% {
-    text-shadow:
-      0 0 6px rgba(139, 92, 246, 0.7),
-      0 0 12px rgba(236, 72, 153, 0.6),
-      0 0 22px rgba(34, 211, 238, 0.5);
-  }
-  100% {
-    text-shadow:
-      0 0 12px rgba(139, 92, 246, 0.9),
-      0 0 24px rgba(236, 72, 153, 0.8),
-      0 0 36px rgba(34, 211, 238, 0.7);
-  }
-}
-
-/* === CORRECCIÓN FINAL: TÍTULO IGUAL AL DE LA WEB EN EXPORT === */
-.export-clean .calendar-title,
-.export-desktop .calendar-title {
-  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
-  font-weight: 900 !important;
-  font-size: 2.4rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.12em !important;
-  background: linear-gradient(90deg, #a855f7, #ec4899, #22d3ee) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
-  text-shadow:
-    0 0 10px rgba(139, 92, 246, 0.7),
-    0 0 20px rgba(236, 72, 153, 0.6),
-    0 0 30px rgba(34, 211, 238, 0.5) !important;
-  filter: brightness(1.2) contrast(1.1) !important;
-  background-color: transparent !important;
-  animation: none !important;
-  opacity: 1 !important;
-  transform: scale(1.05);
-}
-/* === FIX PARA EXPORT (compatibilidad html2canvas) === */
-.export-desktop .calendar-title {
-  font-family: 'Orbitron', 'Rajdhani', 'Inter', sans-serif !important;
-  font-weight: 900 !important;
-  font-size: 2.8rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.15em !important;
-  color: #ffffff !important;
-  background: none !important;
-  text-shadow:
-    0 0 5px #a855f7,
-    0 0 10px #ec4899,
-    0 0 20px #22d3ee,
-    0 0 40px #a855f7 !important;
-}
-
