@@ -357,23 +357,99 @@ const downloadCalendarPDF = useCallback(() => {
 
 
 
-// === Controlador visual para exportar PDF con estado y protección de doble clic ===
+// === Controlador visual para exportar PDF o JPG (optimizado y con feedback visual) ===
 const handleDownloadPDF = async () => {
-  if (isExporting) return; // Previene doble clic
+  if (isExporting) return;
   setIsExporting(true);
 
-  try {
-    const isMobile = window.innerWidth <= 768;
-    console.log(isMobile ? "📱 Exportando desde mobile..." : "💻 Exportando desde escritorio...");
-    
-    await downloadCalendarPDF(); // 🔹 ejecuta tu función original
-  } catch (error) {
-    console.error("❌ Error durante exportación:", error);
-    alert("Ocurrió un error al generar el PDF.");
-  } finally {
-    // 🔹 Pequeño efecto visual al terminar
-    setTimeout(() => setIsExporting(false), 1000);
+  const node = document.querySelector(".calendar-wrapper");
+  if (!node) {
+    alert("❌ No se encontró el calendario.");
+    return;
   }
+
+  const isMobile = window.innerWidth <= 768;
+
+  // Mostrar overlay temporal
+  const overlay = document.createElement("div");
+  Object.assign(overlay.style, {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.6)",
+    color: "#fff",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "1.1rem",
+    fontWeight: "600",
+    zIndex: 9999,
+    backdropFilter: "blur(4px)",
+  });
+  overlay.textContent = isMobile ? "📸 Generando imagen HD..." : "📄 Generando PDF HD...";
+  document.body.appendChild(overlay);
+
+  try {
+  if (isMobile) {
+    // === MOBILE: exporta imagen JPG completa y nítida ===
+    const prev = {
+      width: node.style.width,
+      overflowX: node.style.overflowX,
+      transform: node.style.transform,
+    };
+
+    // 🔹 Expande el calendario para capturarlo entero
+    Object.assign(node.style, {
+      width: "max-content",
+      overflowX: "visible",
+      transform: "scale(1)",
+    });
+
+    // 🔹 Captura completa con buena resolución
+    const canvas = await html2canvas(node, {
+      scale: 2.5,
+      backgroundColor: "#111827",
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: node.scrollWidth,
+      windowHeight: node.scrollHeight,
+    });
+
+    // === Agrega un pequeño borde oscuro alrededor ===
+const margin = 40; // en píxeles — podés ajustar (20 = más fino)
+const borderedCanvas = document.createElement("canvas");
+borderedCanvas.width = canvas.width + margin * 2;
+borderedCanvas.height = canvas.height + margin * 2;
+const ctx = borderedCanvas.getContext("2d");
+
+// Fondo oscuro uniforme
+ctx.fillStyle = "#111827";
+ctx.fillRect(0, 0, borderedCanvas.width, borderedCanvas.height);
+
+// Dibuja el calendario centrado dentro del margen
+ctx.drawImage(canvas, margin, margin);
+
+    // 🔹 Restaura los estilos originales
+    Object.assign(node.style, prev);
+
+    // 🔹 Genera la descarga
+    const link = document.createElement("a");
+    link.download = "calendario_superciclo_hd.jpg";
+    link.href = borderedCanvas.toDataURL("image/jpeg", 0.95);
+    link.click();
+  } else {
+    // === DESKTOP: usa tu función PDF original ===
+    await downloadCalendarPDF();
+  }
+} catch (err) {
+  console.error("❌ Error durante exportación:", err);
+  alert("Ocurrió un error al generar la descarga.");
+} finally {
+  // Elimina overlay y desbloquea botón
+  document.body.removeChild(overlay);
+  setTimeout(() => setIsExporting(false), 800);
+}
+
 };
 
 
@@ -496,8 +572,19 @@ const handleDownloadPDF = async () => {
   {isExporting ? "📄 Generando PDF…" : "⬇️ Descargar PDF"}
 </button>
 
+<div className="mt-4 p-3 rounded-xl border border-pink-500/30 bg-gradient-to-b from-indigo-950/40 to-pink-900/10 text-xs text-gray-200 text-center max-w-sm mx-auto leading-relaxed space-y-2 shadow-[0_0_20px_rgba(236,72,153,0.15)]">
+  <p>
+    ⚙️ <b>Recomendación:</b> para obtener el <b>PDF en máxima calidad</b>, realiza la descarga desde un ordenador o laptop.
+  </p>
+  <p>
+    📱 Si usas un smartphone, el calendario se descargará automáticamente como <b>imagen JPG</b> para una exportación más rápida y estable.
+  </p>
+ <p className="text-pink-300 font-semibold">
+  🚫 En móviles con vista de escritorio, la exportación PDF puede tardar o fallar. Se recomienda usar un ordenador para mejor resultado.
+</p>
 
 
+</div>
 
 
 
