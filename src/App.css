@@ -322,25 +322,119 @@ html, body {
 }
 
 
-/* === Estilo general de las tarjetas principales === */
-section, aside {
+/* === PANEL PRINCIPAL (Estado + Configuración) — versión refinada y geométrica === */
+section,
+aside {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: stretch;
+  text-align: center;
   height: 100%;
-  border-radius: 16px;
+  padding: 1.5rem 1.25rem;
+  border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: radial-gradient(circle at top left, rgba(17, 24, 39, 0.8), rgba(9, 12, 26, 0.95));
-  box-shadow: 0 0 20px rgba(100, 100, 255, 0.05), inset 0 0 12px rgba(255, 255, 255, 0.04);
-  transition: all 0.4s ease;
+  background: radial-gradient(circle at top left, rgba(17, 24, 39, 0.88), rgba(9, 12, 26, 0.96));
+  box-shadow:
+    0 0 20px rgba(120, 100, 255, 0.08),
+    inset 0 0 12px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(6px);
+  min-height: 420px; /* 🔹 equilibrio visual vertical */
+  transition: all 0.3s ease;
 }
 
-section:hover, aside:hover {
-  box-shadow: 0 0 25px rgba(125, 110, 255, 0.25), 0 0 10px rgba(255, 100, 200, 0.25);
+/* Hover refinado */
+section:hover,
+aside:hover {
   transform: translateY(-2px);
+  box-shadow:
+    0 0 25px rgba(236, 72, 153, 0.25),
+    0 0 10px rgba(125, 110, 255, 0.15);
+}
+
+/* Títulos uniformes dentro de paneles */
+section h2,
+aside h2 {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #a5b4fc;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(125, 110, 255, 0.25);
+}
+
+/* Separadores sutiles */
+section div.border-b,
+aside div.border-b {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Tipografía más legible */
+section p,
+aside p {
+  line-height: 1.4;
 }
 
 
+/* === AJUSTE VISUAL FINAL DEL PANEL "ESTADO" === */
+aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem 4rem !important;
+  gap: 1.2rem;
+}
+
+/* Aumenta tamaño y legibilidad de los textos clave */
+aside p.text-sm {
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+}
+
+/* Renglones más amplios (Inicio, Tiempo, Próximo evento) */
+aside .border-b {
+  padding-top: 1.2rem !important;
+  padding-bottom: 1.2rem !important;
+}
+
+/* Mejora contraste de subtítulos */
+aside p.text-gray-400 {
+  color: rgba(210, 214, 225, 0.85) !important;
+  text-shadow: 0 0 6px rgba(125, 110, 255, 0.25);
+}
+
+/* Agranda los valores destacados (hora, días, evento) */
+aside p.font-mono.text-lg,
+aside p.font-mono.text-xl,
+aside p.text-xl {
+  font-size: 1.2rem !important;
+}
+
+aside p.text-3xl {
+  font-size: 2rem !important;
+}
+
+aside p.text-5xl {
+  font-size: 3.5rem !important;
+}
+
+/* Ajuste del botón de estado ON/OFF */
+aside .rounded-full {
+  transform: scale(1.1);
+  font-size: 1.05rem;
+  padding: 0.9rem 2.5rem;
+}
+
+/* Reduce espacio sobrante al final */
+aside > div:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* === Reduce espacio entre título y contenido del panel Estado === */
+aside .section-title {
+  margin-bottom: 0 !important; /* 🔹 antes 1rem */
+}
 
 
 
@@ -381,13 +475,7 @@ button:hover, label:hover {
 }
 
 .section-title::after {
-  content: "";
-  display: block;
-  width: 100px;
-  height: 1px;
-  margin: 0.1rem auto 0;
-  background: linear-gradient(90deg,#f472b6,#8b5cf6);
-  border-radius: 9999px;
+  content: none !important;
 }
 /* === Animación glow-pulse futurista === */
 @keyframes glow-pulse {
@@ -436,6 +524,34 @@ button:hover, label:hover {
       0 0 30px rgba(147, 51, 234, 0.8);
   }
 }
+
+
+/* === EMOJI FUEGO CON EFECTO NEÓN PARPADEANTE === */
+.emoji-fuego {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 6px rgba(255, 75, 75, 0.8))
+          drop-shadow(0 0 12px rgba(255, 150, 50, 0.6))
+          drop-shadow(0 0 20px rgba(255, 80, 0, 0.5));
+  animation: flamePulse 1.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes flamePulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px rgba(255, 75, 75, 0.8))
+            drop-shadow(0 0 12px rgba(255, 150, 50, 0.6))
+            drop-shadow(0 0 20px rgba(255, 80, 0, 0.5));
+  }
+  50% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 12px rgba(255, 150, 50, 1))
+            drop-shadow(0 0 25px rgba(255, 90, 0, 0.9))
+            drop-shadow(0 0 35px rgba(255, 120, 40, 0.7));
+  }
+}
+
+
 
 /* === BOTONES GLOBALES (desktop + mobile) === */
 #export-area .flex.flex-wrap.gap-2.mt-2 {
@@ -708,3 +824,5 @@ button:hover, label:hover {
 button[disabled].cursor-not-allowed {
   animation: pulse-glow 1.5s infinite ease-in-out;
 }
+
+

@@ -483,7 +483,9 @@ ctx.drawImage(canvas, margin, margin);
         </header>
 
         <main className="grid lg:grid-cols-2 gap-6 items-stretch">
-          {/* === CONFIGURACIÓN === */}
+
+
+{/* === CONFIGURACIÓN === */}
 <section
   id="export-area"
   className="p-6 rounded-xl border shadow-lg flex flex-col justify-between items-center text-center min-h-[480px]"
@@ -493,15 +495,12 @@ ctx.drawImage(canvas, margin, margin);
     borderColor: "rgba(147, 51, 234, 0.3)",
   }}
 >
-  <h2 className="section-title">CONFIGURACIÓN</h2>
+  <h2 className="section-title mb-4 tracking-wide">Configuración</h2>
 
-  {/* Inputs agrupados y centrados */}
-  <div className="w-full max-w-md mx-auto flex flex-col gap-5">
+  {/* Inputs agrupados */}
+  <div className="w-full max-w-md mx-auto flex flex-col gap-6">
     <div>
-      <label
-        className="text-sm block mb-1 uppercase font-semibold"
-        style={{ color: "var(--muted)" }}
-      >
+      <label className="text-sm block mb-1 uppercase font-semibold text-gray-400">
         Fecha y hora de inicio
       </label>
       <input
@@ -520,10 +519,7 @@ ctx.drawImage(canvas, margin, margin);
         { label: "Duración (días)", value: durationDays, setter: setDurationDays },
       ].map((f, i) => (
         <div key={i}>
-          <label
-            className="text-sm block mb-1 uppercase font-semibold"
-            style={{ color: "var(--muted)" }}
-          >
+          <label className="text-sm block mb-1 uppercase font-semibold text-gray-400">
             {f.label}
           </label>
           <input
@@ -540,7 +536,7 @@ ctx.drawImage(canvas, margin, margin);
     </div>
   </div>
 
-  {/* Botones con estilo armonizado */}
+  {/* Botones */}
   <div className="flex flex-wrap justify-center gap-3 mt-8">
     <label className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg cursor-pointer shadow-md hover:bg-emerald-700 transition">
       <Upload className="w-4 h-4" /> Importar
@@ -559,35 +555,29 @@ ctx.drawImage(canvas, margin, margin);
       Exportar JSON
     </button>
 
+    <button
+      onClick={handleDownloadPDF}
+      disabled={isExporting}
+      className={`transition-all duration-300 text-white font-bold py-3 px-6 rounded-xl shadow-md ${
+        isExporting
+          ? "bg-gray-600 cursor-not-allowed opacity-70"
+          : "bg-pink-500 hover:bg-pink-600 active:bg-pink-700"
+      }`}
+    >
+      {isExporting ? "📄 Generando PDF…" : "⬇️ Descargar PDF"}
+    </button>
 
-  <button
-  onClick={handleDownloadPDF}
-  disabled={isExporting}
-  className={`transition-all duration-300 text-white font-bold py-3 px-6 rounded-xl shadow-md 
-    ${isExporting
-      ? "bg-gray-600 cursor-not-allowed opacity-70"
-      : "bg-pink-500 hover:bg-pink-600 active:bg-pink-700"
-    }`}
->
-  {isExporting ? "📄 Generando PDF…" : "⬇️ Descargar PDF"}
-</button>
-
-<div className="mt-4 p-3 rounded-xl border border-pink-500/30 bg-gradient-to-b from-indigo-950/40 to-pink-900/10 text-xs text-gray-200 text-center max-w-sm mx-auto leading-relaxed space-y-2 shadow-[0_0_20px_rgba(236,72,153,0.15)]">
-  <p>
-    ⚙️ <b>Recomendación:</b> para obtener el <b>PDF en máxima calidad</b>, realiza la descarga desde un ordenador o laptop.
-  </p>
-  <p>
-    📱 Si usas un smartphone, el calendario se descargará automáticamente como <b>imagen JPG</b> para una exportación más rápida y estable.
-  </p>
- <p className="text-pink-300 font-semibold">
-  🚫 En móviles con vista de escritorio, la exportación PDF puede tardar o fallar. Se recomienda usar un ordenador para mejor resultado.
-</p>
-
-
-</div>
-
-
-
+    <div className="mt-4 p-3 rounded-xl border border-pink-500/30 bg-gradient-to-b from-indigo-950/40 to-pink-900/10 text-xs text-gray-200 text-center max-w-sm mx-auto leading-relaxed space-y-2 shadow-[0_0_20px_rgba(236,72,153,0.15)]">
+      <p>
+        ⚙️ <b>Recomendación:</b> para obtener el <b>PDF en máxima calidad</b>, realiza la descarga desde un ordenador o laptop.
+      </p>
+      <p>
+        📱 Si usas un smartphone, el calendario se descargará automáticamente como <b>imagen JPG</b> para una exportación más rápida y estable.
+      </p>
+      <p className="text-pink-300 font-semibold">
+        🚫 Si usas un móvil en modo escritorio, la exportación PDF puede tardar mucho o fallar. Usa un ordenador para mejor resultado.
+      </p>
+    </div>
 
     <button
       onClick={resetDefaults}
@@ -602,104 +592,121 @@ ctx.drawImage(canvas, margin, margin);
       {errorMsg}
     </div>
   )}
-
-
 </section>
 
-
-          {/* Status */}
-          {/* Panel de Estado mejorado */}
-          <aside
-            className="p-6 rounded-xl border shadow-lg flex flex-col gap-6"
-            style={{
-              background: "rgba(255,255,255,0.02)",
-              minHeight: "100%",
-            }}
-          >
-            <h2 className="section-title">Estado</h2>
-
-            {/* Inicio y Tiempo */}
-            <div className="flex justify-between items-start border-b border-white/10 pb-4">
-              <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Inicio</p>
-                <p className="font-mono text-sm text-gray-200 mt-1">{formatStartDate(startDateObj)}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Tiempo transcurrido</p>
-                <p className="font-mono text-base text-white mt-1">
-                  {formattedTimeElapsed.days}d {formattedTimeElapsed.hours}h {formattedTimeElapsed.minutes}m
-                </p>
-                <p className="text-[11px] text-gray-500">(equivalente a días 24h)</p>
-              </div>
-            </div>
-
-            {/* Ciclos y energía */}
-            <div className="grid grid-cols-2 text-sm border-b border-white/10 pb-4">
-              <div className="text-left">
-                <p className="text-xs text-rose-400 font-bold uppercase tracking-wide">Días Super Ciclo</p>
-                <p className="text-4xl font-extrabold text-rose-500 mt-1">{Math.max(0, customCycleDayIndex)}</p>
-                <p className="text-[11px] text-gray-400 mt-1">
-                  Ciclos de {cycleLength.toFixed(1)}h
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wide">
-                  Balance Energético
-                </p>
-                <p
-                  className={`font-extrabold text-2xl ${
-                    energyBalance > 0
-                      ? "text-emerald-400"
-                      : energyBalance < 0
-                      ? "text-rose-400"
-                      : "text-gray-300"
-                  } mt-1`}
-                >
-                  {energyBalance > 0 ? "▲" : energyBalance < 0 ? "▼" : "•"}{" "}
-                  {Math.abs(energyBalance).toFixed(2)} hrs
-                </p>
-                <p className="text-[11px] text-gray-400 mt-1">
-                  vs ciclo estándar 12L / 12D
-                </p>
-              </div>
-            </div>
-
-            {/* Hora actual */}
-            <div className="border-b border-white/10 pb-4">
-              <p className="text-xs text-gray-400 uppercase tracking-wider">Hora actual</p>
-              <p className="font-mono text-lg text-white mt-1">
-                {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-              </p>
-            </div>
-
-            {/* Estado del ciclo */}
-            {/* Estado del ciclo */}
-                <div className="border-b border-white/10 pb-4 text-center">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider">Estado del ciclo</p>
-                  <div
-                    className={`inline-flex items-center gap-2 px-5 py-2 mt-3 rounded-full font-semibold text-sm shadow-md 
-                      ${isNowLight 
-                        ? "bg-yellow-300/90 text-black glow-anim-on" 
-                        : "bg-indigo-600/90 text-white glow-anim-off"}`}
-                  >
-                    {isNowLight ? "ON 🔆" : "OFF 🌙"}
-                  </div>
-                </div>
+{/* === PANEL DE ESTADO — versión final equilibrada === */}
+<aside
+  className="p-8 rounded-xl border border-white/10 shadow-lg flex flex-col justify-between items-center text-center"
+  style={{
+    background:
+      "radial-gradient(circle at 30% 20%, rgba(17,24,39,0.9), rgba(9,12,26,0.96))",
+    minHeight: "100%",
+  }}
+>
+  {/* --- Título --- */}
+  <h2 className="section-title mb-4 tracking-wide">ESTADO</h2>
 
 
-            {/* Próximo evento */}
-            <div className="text-center">
-              <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-                Próximo evento ({nextChangeEvent.action})
-              </p>
-              <p className="text-base font-bold text-white">
-                {nextChangeEvent.nextState} — {nextChangeEvent.time} ({nextChangeEvent.date})
-              </p>
-              <p className="text-[12px] text-gray-400 mt-1">
-                En {nextChangeEvent.hoursToNext?.toFixed(2)} hrs
-              </p>
-            </div>
-          </aside>
+  {/* --- Contenido expandido para ocupar todo el alto --- */}
+  <div className="flex flex-col justify-evenly w-full max-w-md flex-1 text-gray-200">
+
+    {/* Inicio y tiempo */}
+    <div className="pb-6 border-b border-white/10">
+      <div className="flex justify-between items-center">
+        <div className="text-left">
+          <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">Inicio</p>
+          <p className="font-mono text-lg text-white font-semibold">
+            {formatStartDate(startDateObj)}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">
+            Tiempo transcurrido
+          </p>
+          <p className="font-mono text-xl text-indigo-200 font-bold">
+            {formattedTimeElapsed.days}d {formattedTimeElapsed.hours}h {formattedTimeElapsed.minutes}m
+          </p>
+          <p className="text-[12px] text-gray-500">(equivalente a días 24h)</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Ciclos y energía */}
+    <div className="grid grid-cols-2 border-b border-white/10 pb-6 pt-4">
+      <div>
+        <p className="text-sm text-rose-400 font-bold uppercase tracking-wide">Días Super Ciclo</p>
+        <p className="text-4xl font-extrabold text-rose-500 mt-1 leading-none flex items-center justify-center gap-2">
+  <span className="emoji-fuego">🔥</span>
+  <span>{Math.max(0, customCycleDayIndex)}</span>
+</p>
+
+
+
+        <p className="text-[12px] text-gray-400 mt-1">Ciclos de {cycleLength.toFixed(1)}h</p>
+      </div>
+      <div>
+        <p className="text-sm text-indigo-400 font-semibold uppercase tracking-wide">
+          Balance Energético
+        </p>
+        <p
+  className={`font-extrabold text-4xl mt-1 leading-none ${
+    energyBalance > 0
+      ? "text-emerald-400"
+      : energyBalance < 0
+      ? "text-rose-400"
+      : "text-gray-300"
+  }`}
+>
+
+          {energyBalance > 0 ? "▲" : energyBalance < 0 ? "▼" : "•"}{" "}
+          {Math.abs(energyBalance).toFixed(2)}h
+        </p>
+        <p className="text-[12px] text-gray-400 mt-1">vs ciclo estándar 12L / 12D</p>
+      </div>
+    </div>
+
+    {/* Hora actual */}
+    <div className="border-b border-white/10 py-5">
+      <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">Hora actual</p>
+      <p className="font-mono text-3xl text-white font-semibold">
+        {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+      </p>
+    </div>
+
+    {/* Estado del ciclo */}
+    <div className="border-b border-white/10 py-5">
+      <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">Estado del ciclo</p>
+      <div
+        className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full font-semibold text-base shadow-lg transition-all ${
+          isNowLight
+            ? "bg-yellow-300/90 text-black glow-anim-on"
+            : "bg-indigo-600/90 text-white glow-anim-off"
+        }`}
+      >
+        {isNowLight ? "ON 🔆" : "OFF 🌙"}
+      </div>
+    </div>
+
+    {/* Próximo evento */}
+    <div className="pt-4">
+      <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">
+        Próximo evento ({nextChangeEvent.action})
+      </p>
+      <p className="text-xl font-bold text-white">
+        {nextChangeEvent.nextState} — {nextChangeEvent.time} ({nextChangeEvent.date})
+      </p>
+      <p className="text-[13px] text-indigo-300 mt-1 font-medium">
+        En {nextChangeEvent.hoursToNext?.toFixed(2)} hrs
+      </p>
+    </div>
+  </div>
+</aside>
+
+
+
+
+
+
 
           {/* Calendar full width below */}
 <section
