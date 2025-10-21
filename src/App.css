@@ -321,8 +321,7 @@ html, body {
   position: static !important;
 }
 
-
-/* === PANEL PRINCIPAL (Estado + Configuración) — versión refinada y geométrica === */
+/* === PANEL PRINCIPAL (Estado + Configuración) — versión unificada y limpia === */
 section,
 aside {
   display: flex;
@@ -331,7 +330,7 @@ aside {
   align-items: stretch;
   text-align: center;
   height: 100%;
-  padding: 1.5rem 1.25rem;
+  padding: 1.8rem 2.5rem;
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: radial-gradient(circle at top left, rgba(17, 24, 39, 0.88), rgba(9, 12, 26, 0.96));
@@ -339,7 +338,7 @@ aside {
     0 0 20px rgba(120, 100, 255, 0.08),
     inset 0 0 12px rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(6px);
-  min-height: 420px; /* 🔹 equilibrio visual vertical */
+  min-height: 420px;
   transition: all 0.3s ease;
 }
 
@@ -376,15 +375,6 @@ aside p {
   line-height: 1.4;
 }
 
-
-/* === AJUSTE VISUAL FINAL DEL PANEL "ESTADO" === */
-aside {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 2rem 4rem !important;
-  gap: 1.2rem;
-}
 
 /* Aumenta tamaño y legibilidad de los textos clave */
 aside p.text-sm {
@@ -762,6 +752,8 @@ button:hover, label:hover {
 
 
 
+
+
 /* === MOBILE — Mantiene diseño idéntico al escritorio === */
 @media (max-width: 768px) {
   .calendar-wrapper {
@@ -826,3 +818,113 @@ button[disabled].cursor-not-allowed {
 }
 
 
+/* === PANEL ESTADO - FIEL AL ESCRITORIO EN MOBILE === */
+@media (max-width: 768px) {
+  aside {
+    width: auto !important;           /* ocupa casi todo el ancho */
+    max-width: 460px !important;      /* mantiene proporción del escritorio */
+    margin: 0 auto !important;
+    transform: none !important;       /* sin reducción */
+    padding: 2rem 2.5rem !important;  /* conserva aire interior */
+  }
+
+  aside .section-title {
+    font-size: 1.1rem !important;
+  }
+
+  aside h2 {
+    font-size: 1rem !important;
+  }
+
+  aside p {text-align: inherit;
+    font-size: 0.90rem !important;
+  }
+
+  aside p.text-3xl {
+    font-size: 2rem !important;
+  }
+
+  aside p.text-5xl {
+    font-size: 3.5rem !important;
+  }
+
+  aside .emoji-fuego,
+  aside .emoji-energia-plus,
+  aside .emoji-energia-minus,
+  aside .emoji-equilibrio  {
+    font-size: 1.2rem !important;
+  }
+
+  aside .rounded-full {
+    transform: scale(1.05);
+    padding: 1rem 2.8rem !important;
+    font-size: 1.1rem !important;
+  }
+  aside .text-sub
+  {
+    font-size: 0.6rem !important;
+  }
+}
+
+
+/* === EMOJIS ENERGÉTICOS ANIMADOS === */
+.emoji-energia {
+  font-size: 2.2rem;
+  display: inline-block;
+  transform-origin: center;
+}
+
+/* 💚 Ahorro de energía */
+.emoji-energia-plus {
+  animation: pulsePlus 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(72, 255, 164, 0.8))
+          drop-shadow(0 0 16px rgba(52, 211, 153, 0.6));
+}
+@keyframes pulsePlus {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(72, 255, 164, 0.8));
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 20px rgba(110, 255, 190, 1));
+  }
+}
+
+/* ⚡️ DERROCHE ENERGÉTICO (peligro) */
+.emoji-energia-minus {
+  animation: pulseDanger 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 50, 50, 0.9))
+          drop-shadow(0 0 18px rgba(255, 120, 0, 0.8))
+          drop-shadow(0 0 30px rgba(255, 0, 0, 0.6));
+}
+@keyframes pulseDanger {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(255, 50, 50, 0.9))
+            drop-shadow(0 0 18px rgba(255, 120, 0, 0.8));
+  }
+  50% {
+    transform: scale(1.25) rotate(-10deg);
+    filter: drop-shadow(0 0 25px rgba(255, 80, 0, 1))
+            drop-shadow(0 0 40px rgba(255, 0, 0, 0.9));
+  }
+}
+
+
+/* ⚖️ Equilibrio */
+.emoji-energia-neutral {
+  animation: pulseNeutral 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.7))
+          drop-shadow(0 0 14px rgba(191, 219, 254, 0.5));
+}
+@keyframes pulseNeutral {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.7));
+  }
+  50% {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 18px rgba(191, 219, 254, 1));
+  }
+}

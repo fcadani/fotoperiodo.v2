@@ -648,7 +648,7 @@ ctx.drawImage(canvas, margin, margin);
           <p className="font-mono text-xl text-indigo-200 font-bold">
             {formattedTimeElapsed.days}d {formattedTimeElapsed.hours}h {formattedTimeElapsed.minutes}m
           </p>
-          <p className="text-[12px] text-gray-500">(equivalente a días 24h)</p>
+          <p className="text-sub text-[12px] text-gray-500">(equivalente a días 24h)</p>
         </div>
       </div>
     </div>
@@ -657,34 +657,54 @@ ctx.drawImage(canvas, margin, margin);
     <div className="grid grid-cols-2 border-b border-white/10 pb-6 pt-4">
       <div>
         <p className="text-sm text-rose-400 font-bold uppercase tracking-wide">Días Super Ciclo</p>
-        <p className="text-4xl font-extrabold text-rose-500 mt-1 leading-none flex items-center justify-center gap-2">
-  <span className="emoji-fuego">🔥</span>
-  <span>{Math.max(0, customCycleDayIndex)}</span>
-</p>
+        <p className=" text-4xl font-extrabold text-rose-500 mt-1 leading-none flex items-center justify-center gap-2">
+          <span className="emoji-fuego">🔥</span>
+          <span>{Math.max(0, customCycleDayIndex)}</span>
+        </p>
 
 
 
-        <p className="text-[12px] text-gray-400 mt-1">Ciclos de {cycleLength.toFixed(1)}h</p>
+        <p className="text-sub text-[12px] text-gray-400 mt-1">Ciclos de {cycleLength.toFixed(1)}h</p>
       </div>
       <div>
-        <p className="text-sm text-indigo-400 font-semibold uppercase tracking-wide">
-          Balance Energético
-        </p>
-        <p
-  className={`font-extrabold text-4xl mt-1 leading-none ${
-    energyBalance > 0
-      ? "text-emerald-400"
-      : energyBalance < 0
-      ? "text-rose-400"
-      : "text-gray-300"
-  }`}
->
+  <p className="text-sm text-indigo-400 font-bold uppercase tracking-wide">
+    Balance Energético
+  </p>
 
-          {energyBalance > 0 ? "▲" : energyBalance < 0 ? "▼" : "•"}{" "}
-          {Math.abs(energyBalance).toFixed(2)}h
-        </p>
-        <p className="text-[12px] text-gray-400 mt-1">vs ciclo estándar 12L / 12D</p>
-      </div>
+  <p
+    className={`font-extrabold text-4xl mt-1 leading-none flex items-center justify-center gap-2 ${
+      energyBalance > 0
+        ? "text-emerald-400"
+        : energyBalance < 0
+        ? "text-rose-400"
+        : "text-blue-300"
+    }`}
+  >
+    <span
+      className={`emoji-energia ${
+        energyBalance > 0
+          ? "emoji-energia-plus"
+          : energyBalance < 0
+          ? "emoji-energia-minus"
+          : "emoji-energia-neutral"
+      }`}
+    >
+      {energyBalance > 0
+        ? "🔋" // ahorro de energía
+        : energyBalance < 0
+        ? "⚡️" // derroche / sobreuso peligroso
+        : "⚖️"} {/* equilibrio */}
+    </span>
+
+    <span>{Math.abs(energyBalance).toFixed(2)}h</span>
+  </p>
+
+  <p className="text-sub text-[12px] text-gray-400 mt-1">
+    vs ciclo estándar 12L / 12D
+  </p>
+</div>
+
+
     </div>
 
     {/* Hora actual */}
@@ -723,10 +743,6 @@ ctx.drawImage(canvas, margin, margin);
     </div>
   </div>
 </aside>
-
-
-
-
 
 
 
