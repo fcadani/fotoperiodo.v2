@@ -282,30 +282,47 @@ const downloadCalendarPDF = useCallback(() => {
     background: "#111827",
     margin: "0 auto",
     padding: "40px 60px",
-    borderRadius: "12px",
+    borderRadius: "0",
     boxSizing: "border-box",
-    overflow: "visible",
+    overflow: "hidden",
     transform: "scale(1)",
     width: "max-content",
     maxWidth: "none",
   });
+  
+ // === 🔹 Eliminar sombra y borde del contenedor durante exportación ===
+const section = document.querySelector("#export-area");
+const prevSection = {
+  boxShadow: section.style.boxShadow,
+  borderRadius: section.style.borderRadius,
+  overflow: section.style.overflow, 
+};
+section.style.boxShadow = "none";
+section.style.borderRadius = "0";
+section.style.overflow = "hidden";
 
-  // === Calcular dimensiones exactas ===
-  const rect = node.getBoundingClientRect();
-  const isMobile = window.innerWidth < 768;
 
-  // 🔹 En mobile ampliamos un poco el ancho para evitar recorte derecho
-  const realWidth = Math.ceil(rect.width + (isMobile ? 150 : 0));
-  let realHeight = Math.ceil(rect.height);
 
-  // 🔹 En mobile ajustamos el alto para eliminar el espacio blanco final
-  if (isMobile) {
-    realHeight = realHeight - 20;
-  }
+// === Calcular dimensiones exactas ===
+const rect = node.getBoundingClientRect();
+const isMobile = window.innerWidth < 768;
 
-  // Conversión px → mm
-  const wMM = realWidth * 0.2646;
-  const hMM = realHeight * 0.2646;
+// 🔹 En mobile ampliamos un poco el ancho para evitar recorte derecho
+const realWidth = Math.ceil(rect.width + (isMobile ? 150 : 0));
+
+// 🔹 Altura: usamos Math.floor para evitar 1px extra que crea página vacía
+let realHeight = Math.floor(rect.height);
+
+// 🔹 En mobile ajustamos el alto para eliminar el espacio blanco final
+if (isMobile) {
+  realHeight = realHeight - 20;
+}
+
+// 🔹 Conversión px → mm
+const wMM = realWidth * 0.2646;
+const hMM = realHeight * 0.2646 ; // 🔹 resta 2 mm para evitar salto de página
+
+
 
   // === Configuración PDF ===
   const opt = {
@@ -330,10 +347,12 @@ const downloadCalendarPDF = useCallback(() => {
     },
     jsPDF: {
       unit: "mm",
-      format: [wMM, hMM],
+       format: [wMM, hMM + 0.1],
       orientation: wMM > hMM ? "landscape" : "portrait",
       compress: true,
       precision: 16,
+      autoPaging: "none",
+
     },
   };
 
@@ -345,6 +364,9 @@ const downloadCalendarPDF = useCallback(() => {
       .save()
       .then(() => {
         Object.assign(node.style, prev);
+    section.style.boxShadow = prevSection.boxShadow;
+    section.style.borderRadius = prevSection.borderRadius;
+    section.style.overflow = prevSection.overflow;
       })
       .catch((err) => {
         console.error("❌ Error al generar PDF:", err);
@@ -711,7 +733,7 @@ ctx.drawImage(canvas, margin, margin);
           {/* Calendar full width below */}
 <section
    id="export-area"
-   className="lg:col-span-3 mt-4 p-0 rounded-xl border shadow-lg overflow-hidden"
+   className="lg:col-span-3 mt-4 mb p-0 rounded-xl border shadow-lg overflow-hidden"
    style={{ background: "rgba(255,255,255,0.02)" }}
  >
 
@@ -824,7 +846,7 @@ ctx.drawImage(canvas, margin, margin);
           transition: "all .12s ease",
         }}
       >
-        {cell.isLight ? "L" : "D"}
+        {cell.isLight ? "ON" : "OFF "}
       </div>
     </td>
   );
@@ -842,11 +864,13 @@ ctx.drawImage(canvas, margin, margin);
 </div>
 
 
-          <div className="p-3 text-xs text-gray-400 border-t">
-            Leyenda: L = Luz, D = Oscuridad. Celda actual marcada con contorno rosado
-            brillante. Podés descargar el calendario como imagen (JPG) para usarlo
-            de wallpaper.
-          </div>
+          <div className="p-3 text-xs border-t text-center text-gray-400">
+        🔆 <span className="text-yellow-300 font-semibold">ON</span> = Luz · 
+        🌙 <span className="text-indigo-300 font-semibold">OFF</span> = Oscuridad · 
+        <span className="text-pink-400 font-semibold">Celda resaltada</span> = hora actual del día · 
+        <span className="text-gray-300">Descargable como PDF (PC) o JPG (móvil)</span>
+      </div>
+
         </section>
 
         </main>

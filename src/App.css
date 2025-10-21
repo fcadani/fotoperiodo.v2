@@ -764,16 +764,16 @@ button:hover, label:hover {
 
 /* === MOBILE — Mantiene diseño idéntico al escritorio === */
 @media (max-width: 768px) {
-
-  /* Contenedor principal sin exceso de padding */
   .calendar-wrapper {
     padding-left: 0.4rem !important;
     padding-right: 0.4rem !important;
     overflow-x: auto;
     overflow-y: hidden;
-    transform: scale(0.92); /* 🔹 compacta visualmente sin distorsionar */
-    transform-origin: top center;
+    transform: none !important;       /* 🔹 elimina el escalado */
+    margin-bottom: -6px !important;   /* 🔹 compensa el gap visual */
   }
+}
+
 
   /* Mantener proporciones y colores de escritorio */
   .calendar td div {
@@ -818,7 +818,7 @@ button:hover, label:hover {
       0 0 12px rgba(255, 105, 180, 0.7),
       0 0 26px rgba(147, 51, 234, 0.6);
   }
-}
+
 
 
 button[disabled].cursor-not-allowed {
