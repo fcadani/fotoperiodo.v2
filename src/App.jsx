@@ -49,6 +49,8 @@ export default function App() {
   const [hoursLight, setHoursLight] = useState(13);
   const [hoursDark, setHoursDark] = useState(14);
   const [durationDays, setDurationDays] = useState(60);
+  const [nombreCiclo, setNombreCiclo] = useState("Mi Cultivo");
+
 
   const [now, setNow] = useState(new Date());
   const [errorMsg, setErrorMsg] = useState("");
@@ -58,27 +60,33 @@ export default function App() {
   const calendarRef = useRef(null);
 
 
-  // ---- Load saved settings on mount ----
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const obj = safeParseJSON(raw, null);
-    if (!obj) return;
-    if (obj.startDate) setStartDate(String(obj.startDate));
-    if (Number.isFinite(Number(obj.hoursLight))) setHoursLight(Number(obj.hoursLight));
-    if (Number.isFinite(Number(obj.hoursDark))) setHoursDark(Number(obj.hoursDark));
-    if (Number.isFinite(Number(obj.durationDays))) setDurationDays(Number(obj.durationDays));
-  }, []);
+// ---- Load saved settings on mount ----
+useEffect(() => {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  const obj = safeParseJSON(raw, null);
+  if (!obj) return;
 
-  // ---- Autosave (debounced simple) ----
-  useEffect(() => {
-    const payload = { startDate, hoursLight, hoursDark, durationDays };
-    const id = setTimeout(() => {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
-      catch (e) { console.warn("No se pudo guardar en localStorage:", e); }
-    }, 300);
-    return () => clearTimeout(id);
-  }, [startDate, hoursLight, hoursDark, durationDays]);
+  if (obj.nombreCiclo) setNombreCiclo(String(obj.nombreCiclo));
+  if (obj.startDate) setStartDate(String(obj.startDate));
+  if (Number.isFinite(Number(obj.hoursLight))) setHoursLight(Number(obj.hoursLight));
+  if (Number.isFinite(Number(obj.hoursDark))) setHoursDark(Number(obj.hoursDark));
+  if (Number.isFinite(Number(obj.durationDays))) setDurationDays(Number(obj.durationDays));
+}, []);
+
+// ---- Autosave (debounced simple) ----
+useEffect(() => {
+  const payload = { startDate, hoursLight, hoursDark, durationDays, nombreCiclo };
+  const id = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.warn("No se pudo guardar en localStorage:", e);
+    }
+  }, 300);
+  return () => clearTimeout(id);
+}, [startDate, hoursLight, hoursDark, durationDays, nombreCiclo]);
+
 
   // ---- Tick for 'now' ----
   useEffect(() => {
@@ -219,43 +227,122 @@ function isLightAtAbsoluteHours(hoursSinceStart) {
     };
   }, [now, isNowLight, currentInCycle, hoursLight, hoursDark, cycleLength]);
 
-  // export / import / reset
-  const handleExport = useCallback(() => {
-    const payload = { startDate, hoursLight, hoursDark, durationDays };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'fotoperiodo-config.json'; a.click();
-    URL.revokeObjectURL(url);
-  }, [startDate, hoursLight, hoursDark, durationDays]);
+  // --- Export / Import / Reset ---
 
-  const handleImport = useCallback((file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const obj = JSON.parse(e.target.result);
-        if (obj.startDate) setStartDate(String(obj.startDate));
-        if (Number.isFinite(Number(obj.hoursLight))) setHoursLight(Number(obj.hoursLight));
-        if (Number.isFinite(Number(obj.hoursDark))) setHoursDark(Number(obj.hoursDark));
-        if (Number.isFinite(Number(obj.durationDays))) setDurationDays(Number(obj.durationDays));
-      } catch (err) {
-        alert('Archivo inválido o con formato incorrecto.');
-      }
-    };
-    reader.readAsText(file);
-  }, []);
+const handleExport = useCallback(() => {
+  const payload = { startDate, hoursLight, hoursDark, durationDays, nombreCiclo };
 
-  const resetDefaults = useCallback(() => {
-    const d = new Date(); d.setHours(0,0,0,0);
-    setStartDate(fmtDateTimeLocal(d));
-    setHoursLight(13); setHoursDark(14); setDurationDays(60);
-  }, []);
+  // 🗓️ Nombre del archivo con formato: fecha_nombre_SUPERCICLO.json
+  const fecha = startDate
+    ? new Date(startDate).toISOString().split("T")[0]
+    : new Date().toISOString().split("T")[0];
 
-  const formatStartDate = useCallback((dObj) => {
-    if (!dObj || isNaN(dObj.getTime())) return '--';
-    return dObj.toLocaleString();
-  }, []);
+  const nombreArchivo = `${fecha}_${nombreCiclo?.trim() || "Superciclo"}_SUPERCICLO.json`
+    .replace(/\s+/g, "_"); // Reemplaza espacios por guiones bajos
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombreArchivo;
+  a.click();
+  URL.revokeObjectURL(url);
+}, [startDate, hoursLight, hoursDark, durationDays, nombreCiclo]);
+
+// --- Importar configuración ---
+const handleImport = useCallback((file) => {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      if (obj.nombreCiclo) setNombreCiclo(String(obj.nombreCiclo));
+      if (obj.startDate) setStartDate(String(obj.startDate));
+      if (Number.isFinite(Number(obj.hoursLight))) setHoursLight(Number(obj.hoursLight));
+      if (Number.isFinite(Number(obj.hoursDark))) setHoursDark(Number(obj.hoursDark));
+      if (Number.isFinite(Number(obj.durationDays))) setDurationDays(Number(obj.durationDays));
+    } catch (err) {
+      alert("⚠️ Archivo inválido o con formato incorrecto.");
+    }
+  };
+  reader.readAsText(file);
+}, []);
+
+// === Drag & Drop para escritorio ===
+useEffect(() => {
+  const dropZone = document.getElementById("import-dropzone");
+  if (!dropZone) return;
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) return; // 👉 en móvil no aplicamos drag & drop
+
+  const preventDefaults = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const highlight = () => {
+    dropZone.style.background = "rgba(16,185,129,0.25)";
+    dropZone.style.boxShadow = "0 0 12px rgba(16,185,129,0.6)";
+  };
+  const unhighlight = () => {
+    dropZone.style.background = "";
+    dropZone.style.boxShadow = "";
+  };
+
+  const handleDrop = (e) => {
+    preventDefaults(e);
+    unhighlight();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === "application/json") {
+      handleImport(file);
+    } else {
+      alert("⚠️ Solo se aceptan archivos .json válidos");
+    }
+  };
+
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((event) => {
+    dropZone.addEventListener(event, preventDefaults, false);
+  });
+  ["dragenter", "dragover"].forEach((event) => {
+    dropZone.addEventListener(event, highlight, false);
+  });
+  ["dragleave", "drop"].forEach((event) => {
+    dropZone.addEventListener(event, unhighlight, false);
+  });
+  dropZone.addEventListener("drop", handleDrop, false);
+
+  return () => {
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((event) => {
+      dropZone.removeEventListener(event, preventDefaults, false);
+    });
+    ["dragenter", "dragover"].forEach((event) => {
+      dropZone.removeEventListener(event, highlight, false);
+    });
+    ["dragleave", "drop"].forEach((event) => {
+      dropZone.removeEventListener(event, unhighlight, false);
+    });
+    dropZone.removeEventListener("drop", handleDrop, false);
+  };
+}, [handleImport]);
+
+
+// --- Reset a valores por defecto ---
+const resetDefaults = useCallback(() => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  setStartDate(fmtDateTimeLocal(d));
+  setHoursLight(13);
+  setHoursDark(14);
+  setDurationDays(60);
+  setNombreCiclo(""); // 🔹 Limpia también el nombre del ciclo
+}, []);
+
+// --- Formateo de fecha ---
+const formatStartDate = useCallback((dObj) => {
+  if (!dObj || isNaN(dObj.getTime())) return "--";
+  return dObj.toLocaleString();
+}, []);
 
   // run validation to show errors early
   useEffect(() => { validateInputs(); }, [validateInputs]);
@@ -517,116 +604,162 @@ ctx.drawImage(canvas, margin, margin);
     borderColor: "rgba(147, 51, 234, 0.3)",
   }}
 >
-  <h2 className="section-title mb-4 tracking-wide">Configuración</h2>
+  <h2 className="section-title mb-5 tracking-wide flex items-center justify-center gap-2 text-indigo-400 drop-shadow-[0_0_6px_rgba(147,51,234,0.6)]">
+  ⚙️ Configuración
+</h2>
 
-  {/* Inputs agrupados */}
-  <div className="w-full max-w-md mx-auto flex flex-col gap-6">
-    <div>
-      <label className="text-sm block mb-1 uppercase font-semibold text-gray-400">
+<div className="w-full max-w-md mx-auto space-y-6">
+
+  {/* Fecha y nombre */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div
+      className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
+    >
+      <label className="block text-xs uppercase font-semibold text-indigo-300 mb-1 tracking-wide">
         Fecha y hora de inicio
       </label>
       <input
         type="datetime-local"
         value={startDate}
         onChange={(e) => setStartDate(e.target.value)}
-        className="w-full p-3 rounded-lg border border-transparent outline-none text-center font-medium"
-        style={{ background: "rgba(255,255,255,0.04)", color: "#fff" }}
+        className="w-full p-2 rounded-md text-center text-sm font-medium bg-gray-900/70 border border-gray-700 text-white focus:ring-2 focus:ring-indigo-500"
       />
     </div>
 
-    <div className="grid grid-cols-3 gap-3">
-      {[
-        { label: <>HORAS<br />ON</>, value: hoursLight, setter: setHoursLight },
-        { label: <>HORAS<br />OFF</>, value: hoursDark, setter: setHoursDark },
-        { label: "Duración (días)", value: durationDays, setter: setDurationDays },
-      ].map((f, i) => (
-        <div key={i}>
-          <label className="text-sm block mb-1 uppercase font-semibold text-gray-400">
-            {f.label}
-          </label>
-          <input
-            type="number"
-            min={i === 2 ? "1" : "0"}
-            step="0.5"
-            value={f.value}
-            onChange={(e) => f.setter(clamp(Number(e.target.value), 0, 9999))}
-            className="w-full p-3 rounded-lg border border-transparent outline-none text-center font-medium"
-            style={{ background: "rgba(255,255,255,0.04)", color: "#fff" }}
-          />
-        </div>
-      ))}
+    <div
+      className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
+    >
+      <label className="block text-xs uppercase font-semibold text-indigo-300 mb-1 tracking-wide">
+        Nombre del superciclo
+      </label>
+      <input
+        type="text"
+        value={nombreCiclo}
+        onChange={(e) => setNombreCiclo(e.target.value)}
+        placeholder="Ej: Auto Amnesia"
+        className="w-full p-2 rounded-md text-center text-sm font-medium bg-gray-900/70 border border-gray-700 text-white focus:ring-2 focus:ring-pink-500"
+      />
     </div>
+  </div>
+
+  {/* Horas */}
+  <div className="grid grid-cols-3 gap-3">
+    {[
+      { label: "Horas ON", value: hoursLight, setter: setHoursLight },
+      { label: "Horas OFF", value: hoursDark, setter: setHoursDark },
+      { label: "Duración (días)", value: durationDays, setter: setDurationDays },
+    ].map((f, i) => (
+      <div
+        key={i}
+        className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
+      >
+        <label className="block text-xs uppercase font-semibold text-indigo-300 mb-1 tracking-wide">
+          {f.label}
+        </label>
+        <input
+          type="number"
+          min={i === 2 ? "1" : "0"}
+          step="0.5"
+          value={f.value}
+          onChange={(e) => f.setter(clamp(Number(e.target.value), 0, 9999))}
+          className="w-full p-2 rounded-md text-center text-sm font-medium bg-gray-900/70 border border-gray-700 text-white focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+    ))}
   </div>
 
   {/* Botones */}
-  <div className="flex flex-wrap justify-center gap-3 mt-8">
-    <label className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg cursor-pointer shadow-md hover:bg-emerald-700 transition">
-      <Upload className="w-4 h-4" /> Importar
-      <input
-        type="file"
-        accept="application/json"
-        onChange={(e) => handleImport(e.target.files?.[0])}
-        className="hidden"
-      />
-    </label>
+  <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 mt-6">
+
+        {/* Aviso minimalista */}
+        <p className="text-[0.7rem] text-gray-400 text-center mb-1 hidden sm:block">
+          Arrastrá tu archivo aquí o hacé clic
+        </p>
+
+        <label
+          id="import-dropzone"
+          className="relative flex items-center justify-center gap-2 px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg cursor-pointer shadow-md hover:bg-emerald-700 transition"
+        >
+          🚀 Cargar Superciclo
+          <input
+            type="file"
+            accept="application/json"
+            onChange={(e) => handleImport(e.target.files?.[0])}
+            className="hidden"
+          />
+        </label>
+
+
+
+
+
 
     <button
       onClick={handleExport}
-      className="flex items-center gap-2 px-3 py-2 text-sm bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-600 transition"
+      className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-500 transition"
     >
-      Exportar JSON
+      💾 Guardar Superciclo
     </button>
 
+    {/* Descargar calendario (PDF en PC / JPG en móvil) */}
+{(() => {
+  const isMobile = window.innerWidth <= 768;
+  return (
     <button
       onClick={handleDownloadPDF}
       disabled={isExporting}
-      className={`transition-all duration-300 text-white font-bold py-3 px-6 rounded-xl shadow-md ${
+      className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg shadow-md transition-all ${
         isExporting
           ? "bg-gray-600 cursor-not-allowed opacity-70"
-          : "bg-pink-500 hover:bg-pink-600 active:bg-pink-700"
+          : "bg-pink-600 hover:bg-pink-500 active:bg-pink-700 text-white"
       }`}
     >
-      {isExporting ? "📄 Generando PDF…" : "⬇️ Descargar PDF"}
+      {isExporting
+        ? (isMobile ? "🖼️ Generando imagen..." : "📄 Generando PDF...")
+        : (isMobile ? "⬇️ Descargar JPG" : "⬇️ Descargar PDF")}
     </button>
+  );
+})()}
 
-    <div className="mt-4 p-3 rounded-xl border border-pink-500/30 bg-gradient-to-b from-indigo-950/40 to-pink-900/10 text-xs text-gray-200 text-center max-w-sm mx-auto leading-relaxed space-y-2 shadow-[0_0_20px_rgba(236,72,153,0.15)]">
-      <p>
-        ⚙️ <b>Recomendación:</b> para obtener el <b>PDF en máxima calidad</b>, realiza la descarga desde un ordenador o laptop.
-      </p>
-      <p>
-        📱 Si usas un smartphone, el calendario se descargará automáticamente como <b>imagen JPG</b> para una exportación más rápida y estable.
-      </p>
-      <p className="text-pink-300 font-semibold">
-        🚫 Si usas un móvil en modo escritorio, la exportación PDF puede tardar mucho o fallar. Usa un ordenador para mejor resultado.
-      </p>
-    </div>
 
     <button
       onClick={resetDefaults}
-      className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+      className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
     >
-      <RefreshCw className="w-4 h-4" /> Reset
+     🔁 Resetear
     </button>
   </div>
 
+{/* Recomendación */}
+<div className="mt-5 text-xs text-gray-300 bg-gray-900/60 border border-gray-700 p-3 rounded-lg leading-snug max-w-md mx-auto shadow-[0_0_10px_rgba(147,51,234,0.15)]">
+  ⚙️ <b>Recomendación:</b> para obtener la <b>máxima calidad de exportación</b>, usá un ordenador o laptop.
+  <br />📱 En dispositivos móviles, el calendario se genera automáticamente como <b>imagen JPG</b>. Puede demorar unos segundos en iniciarse.
+</div>
+
   {errorMsg && (
-    <div className="text-sm text-red-400 mt-2 p-2 bg-red-900/20 rounded-lg w-full max-w-md">
+    <div className="text-sm text-red-400 mt-3 p-2 bg-red-900/20 rounded-lg w-full max-w-md">
       {errorMsg}
     </div>
   )}
+</div>
+
+
 </section>
 
 {/* === PANEL DE ESTADO — versión final equilibrada === */}
 <aside
-  className="p-8 rounded-xl border border-white/10 shadow-lg flex flex-col justify-between items-center text-center"
+  className="p-8 rounded-xl border shadow-lg flex flex-col justify-between items-center text-center transition-all duration-300"
   style={{
-    background:
-      "radial-gradient(circle at 30% 20%, rgba(17,24,39,0.9), rgba(9,12,26,0.96))",
+    background: "rgba(255,255,255,0.02)",
+    boxShadow: "0 0 15px rgba(147, 51, 234, 0.15), inset 0 0 15px rgba(255,255,255,0.05)",
+    borderColor: "rgba(147, 51, 234, 0.3)",
     minHeight: "100%",
   }}
 >
-  {/* --- Título --- */}
-  <h2 className="section-title mb-4 tracking-wide">ESTADO</h2>
+   {/* --- Título --- */}
+  <h2 className="section-title mb-5 tracking-wide flex items-center justify-center gap-2 text-indigo-300 drop-shadow-[0_0_6px_rgba(147,51,234,0.6)]">
+    🌗 Estado
+  </h2>
 
 
   {/* --- Contenido expandido para ocupar todo el alto --- */}
