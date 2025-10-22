@@ -616,7 +616,7 @@ ctx.drawImage(canvas, margin, margin);
       className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
     >
       <label className="block text-xs uppercase font-semibold text-indigo-300 mb-1 tracking-wide">
-        Fecha y hora de inicio
+        Inicio (FECHA Y HORA)
       </label>
       <input
         type="datetime-local"
@@ -630,7 +630,7 @@ ctx.drawImage(canvas, margin, margin);
       className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
     >
       <label className="block text-xs uppercase font-semibold text-indigo-300 mb-1 tracking-wide">
-        Nombre del superciclo
+        Nombre del cultivo
       </label>
       <input
         type="text"
@@ -688,10 +688,6 @@ ctx.drawImage(canvas, margin, margin);
             className="hidden"
           />
         </label>
-
-
-
-
 
 
     <button
@@ -757,34 +753,71 @@ ctx.drawImage(canvas, margin, margin);
   }}
 >
    {/* --- Título --- */}
-  <h2 className="section-title mb-5 tracking-wide flex items-center justify-center gap-2 text-indigo-300 drop-shadow-[0_0_6px_rgba(147,51,234,0.6)]">
+  <h2 className="section-title mb-2 tracking-wide flex items-center justify-center gap-2 text-indigo-300 drop-shadow-[0_0_6px_rgba(147,51,234,0.6)]">
     🌗 Estado
   </h2>
 
+  {/* Superciclo + Hora actual */}
+  <div className="border-b border-white/10 pb-5 mb-4 text-center">
+    {nombreCiclo && (
+      <p className="text-base text-indigo-200 font-semibold mb-2 tracking-wide">
+        - Superciclo -{" "}
+        <span className="text-indigo-100 font-bold">"{nombreCiclo}"</span>
+      </p>
+    )}
+    <div>
+      <p className="text-sm text-gray-300 uppercase tracking-wider mb-1">
+        Hora actual
+      </p>
+      <p className="font-mono text-3xl text-white font-bold">
+        {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+      </p>
+    </div>
+  </div>
 
   {/* --- Contenido expandido para ocupar todo el alto --- */}
   <div className="flex flex-col justify-evenly w-full max-w-md flex-1 text-gray-200">
-
-    {/* Inicio y tiempo */}
-    <div className="pb-6 border-b border-white/10">
-      <div className="flex justify-between items-center">
-        <div className="text-left">
-          <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">Inicio</p>
-          <p className="font-mono text-lg text-white font-semibold">
-            {formatStartDate(startDateObj)}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">
-            Tiempo transcurrido
-          </p>
-          <p className="font-mono text-xl text-indigo-200 font-bold">
-            {formattedTimeElapsed.days}d {formattedTimeElapsed.hours}h {formattedTimeElapsed.minutes}m
-          </p>
-          <p className="text-sub text-[12px] text-gray-500">(equivalente a días 24h)</p>
-        </div>
-      </div>
+   
+{/* Inicio y tiempo */}
+<div className="py-3 border-b border-white/10">
+  <div className="flex justify-between items-start gap-8">
+    
+    {/* Inicio */}
+    <div className="text-left">
+      <p className="text-[15px] text-gray-300 uppercase tracking-wide mb-1 font-semibold">
+        Inicio
+      </p>
+      <p className="font-mono text-lg text-white font-bold leading-snug">
+        {startDateObj.toLocaleDateString("es-AR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })}
+      </p>
+      <p className="font-mono text-sm text-gray-400 mt-0.5">
+        {startDateObj.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </p>
     </div>
+
+    {/* Tiempo transcurrido */}
+    <div className="text-right translate-y-[2px]">
+      <p className="text-[15px] text-gray-300 uppercase tracking-wide mb-1 font-semibold leading-tight">
+        Tiempo<br />transcurrido
+      </p>
+      <p className="font-mono text-[21px] text-indigo-200 font-extrabold leading-none">
+        {formattedTimeElapsed.days}d {formattedTimeElapsed.hours}h{" "}
+        {formattedTimeElapsed.minutes}m
+      </p>
+      <p className="text-[12px] text-gray-400 mt-1 leading-none">
+        (equivalente a días 24h)
+      </p>
+    </div>
+  </div>
+</div>
+
 
     {/* Ciclos y energía */}
     <div className="grid grid-cols-2 border-b border-white/10 pb-6 pt-4">
@@ -840,13 +873,6 @@ ctx.drawImage(canvas, margin, margin);
 
     </div>
 
-    {/* Hora actual */}
-    <div className="border-b border-white/10 py-5">
-      <p className="text-sm text-gray-400 uppercase tracking-wider mb-1">Hora actual</p>
-      <p className="font-mono text-3xl text-white font-semibold">
-        {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-      </p>
-    </div>
 
     {/* Estado del ciclo */}
     <div className="border-b border-white/10 py-5">
@@ -883,7 +909,11 @@ ctx.drawImage(canvas, margin, margin);
 <section
    id="export-area"
    className="lg:col-span-3 mt-4 mb p-0 rounded-xl border shadow-lg overflow-hidden"
-   style={{ background: "rgba(255,255,255,0.02)" }}
+    style={{
+    background: "rgba(255,255,255,0.02)",
+    boxShadow: "0 0 15px rgba(147,51,234,0.15), inset 0 0 15px rgba(255,255,255,0.05)",
+    borderColor: "rgba(147,51,234,0.3)"
+  }}
  >
 
   {/* Contenedor con scroll controlado */}
