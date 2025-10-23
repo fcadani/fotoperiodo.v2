@@ -193,7 +193,7 @@ function isLightAtAbsoluteHours(hoursSinceStart) {
       const dateForDay = new Date(startOfDayStart.getTime() + d * MS_PER_DAY);
       const dateDisplay = dateForDay.toLocaleDateString([], { day: '2-digit', month: '2-digit' }).replace(/\//g, '/');
       for (let h = 0; h < 24; h++) {
-        const hoursSinceStart = d * 24 + h + fractionalStartOffset;
+        const hoursSinceStart = d * 24 + h - fractionalStartOffset;
         row.push({
           isLight: Boolean(isLightAtAbsoluteHours(hoursSinceStart)),
           dateDisplay
