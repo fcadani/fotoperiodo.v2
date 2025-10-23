@@ -652,9 +652,9 @@ ctx.drawImage(canvas, margin, margin);
   {/* Horas */}
   <div className="grid grid-cols-3 gap-3">
     {[
-      { label: "Horas ON", value: hoursLight, setter: setHoursLight },
-      { label: "Horas OFF", value: hoursDark, setter: setHoursDark },
-      { label: "Duración (días)", value: durationDays, setter: setDurationDays },
+      { label: "ON (hs)", value: hoursLight, setter: setHoursLight },
+      { label: "OFF (hs)", value: hoursDark, setter: setHoursDark },
+      { label: "Dias", value: durationDays, setter: setDurationDays },
     ].map((f, i) => (
       <div
         key={i}
