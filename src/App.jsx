@@ -613,18 +613,25 @@ ctx.drawImage(canvas, margin, margin);
   {/* Fecha y nombre */}
   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div
-      className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
-    >
-      <label className="block text-xs uppercase font-semibold text-indigo-300 mb-1 tracking-wide">
-        Inicio (FECHA Y HORA)
-      </label>
-      <input
-        type="datetime-local"
-        value={startDate}
-        onChange={(e) => setStartDate(e.target.value)}
-        className="w-full p-2 rounded-md text-center text-sm font-medium bg-gray-900/70 border border-gray-700 text-white focus:ring-2 focus:ring-indigo-500"
-      />
-    </div>
+  className="p-2.5 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_8px_rgba(147,51,234,0.15)]"
+>
+  <label className="block text-[10px] uppercase font-semibold text-indigo-300 mb-1 tracking-wider">
+    Inicio (Luz ON)
+  </label>
+
+  <input
+    type="datetime-local"
+    value={startDate}
+    onChange={(e) => setStartDate(e.target.value)}
+    className="w-full p-1.5 rounded-md text-center text-[13px] font-medium bg-gray-900/70 border border-gray-700 text-white focus:ring-2 focus:ring-indigo-500"
+  />
+
+  <p className="mt-1.5 text-[0.65rem] text-indigo-200/70 leading-snug">
+    🕓 <b>Primer encendido</b> del Superciclo
+  </p>
+</div>
+
+
 
     <div
       className="p-3 rounded-xl bg-gradient-to-b from-indigo-950/40 to-purple-900/10 border border-indigo-500/30 shadow-[inset_0_0_10px_rgba(147,51,234,0.15)]"
