@@ -984,68 +984,61 @@ ctx.drawImage(canvas, margin, margin);
 
 
     <tbody>
-      {calendar.map((row, d) => (
-        <tr
-          key={d}
-          className={`${
-            d === currentDayIndex24h ? "current-day-row" : ""
-          } transition-all duration-500`}
-        >
-        {/* Columna fija: Día */}
-          <td className="p-1 sticky-col font-semibold">
-            {d + 1}
-          </td>
+  {calendar.map((row, d) => {
+    const isCurrentDay = d === currentDayIndex24h; // Día actual
 
-          {/* Columna fija: Fecha */}
-          <td className="p-1 sticky-col-2 font-semibold">
-            {row[0].dateDisplay}
-          </td>
-
-            {/* Horas */}
-            {row.map((cell, h) => {
-  // 🔹 Hora actual del sistema
-  const currentDate = new Date();
-
-  // 🔹 Calcular día actual respecto al inicio del calendario (00:00 del día inicial)
-  const startOfDayStart = new Date(startDateObj);
-  startOfDayStart.setHours(0, 0, 0, 0);
-  const diffHours = (currentDate - startOfDayStart) / (1000 * 60 * 60);
-  const currentDayCycle = Math.floor(diffHours / 24);
-
-  // 🔹 Hora actual del sistema (0–23)
-  const currentHourCycle = currentDate.getHours();
-
-  // 🔹 Determina si esta celda es la actual (día y hora reales)
-  const isCurrent = d === currentDayCycle && h === currentHourCycle;
-
-  return (
-    <td key={h} className="p-0.5">
-      <div
-        className={`w-full h-7 rounded-sm flex items-center justify-center text-xs font-mono font-semibold calendar-cell-text ${
-          isCurrent ? "now-cell-active" : ""
-        }`}
-        style={{
-          background: cell.isLight
-            ? "linear-gradient(90deg,#f59e0b,#f472b6)"
-            : "linear-gradient(90deg,#4338ca,#4338ca99)",
-          color: "#fff",
-          transition: "all .12s ease",
-        }}
+    return (
+      <tr
+        key={d}
+        className={`${isCurrentDay ? "current-day-row" : ""} transition-all duration-500`}
       >
-        {cell.isLight ? "ON" : "OFF "}
-      </div>
-    </td>
-  );
-})}
+        {/* Columna fija: Día */}
+        <td className="p-1 sticky-col font-semibold">{d + 1}</td>
 
+        {/* Columna fija: Fecha */}
+        <td className="p-1 sticky-col-2 font-semibold">{row[0].dateDisplay}</td>
 
+        {/* Horas */}
+        {row.map((cell, h) => {
+          // 🔹 Hora actual del sistema
+          const currentDate = new Date();
 
+          // 🔹 Calcular día actual respecto al inicio del calendario (00:00 del día inicial)
+          const startOfDayStart = new Date(startDateObj);
+          startOfDayStart.setHours(0, 0, 0, 0);
+          const diffHours = (currentDate - startOfDayStart) / (1000 * 60 * 60);
+          const currentDayCycle = Math.floor(diffHours / 24);
 
+          // 🔹 Hora actual del sistema (0–23)
+          const currentHourCycle = currentDate.getHours();
 
+          // 🔹 Determina si esta celda es la actual (día y hora reales)
+          const isCurrent = d === currentDayCycle && h === currentHourCycle;
 
-        </tr>
-      ))}
-    </tbody>
+          return (
+            <td key={h} className="p-0.5">
+              <div
+                className={`w-full h-7 rounded-sm flex items-center justify-center text-xs font-mono font-semibold calendar-cell-text ${
+                  isCurrent ? "now-cell-active" : ""
+                }`}
+                style={{
+                  background: cell.isLight
+                    ? "linear-gradient(90deg,#f59e0b,#f472b6)"
+                    : "linear-gradient(90deg,#4338ca,#4338ca99)",
+                  color: "#fff",
+                  transition: "all .12s ease",
+                }}
+              >
+                {cell.isLight ? "ON" : "OFF"}
+              </div>
+            </td>
+          );
+        })}
+      </tr>
+    );
+  })}
+</tbody>
+
   </table>
 </div>
 
